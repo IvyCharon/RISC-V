@@ -1,2 +1,1 @@
-# RISC-V
-a toy CPU
+# CPU
