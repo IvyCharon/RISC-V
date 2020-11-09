@@ -22,22 +22,6 @@
 `define RAM_SIZE      100
 `define RAM_SIZELOG2  17
 
-//OPCODE
-//`define OpLen 7
-//`define INTCOM_ORI 7'b0010011
-
-//AluOP
-//`define OpCodeLen 4
-//`define EXE_OR 4'b0110
-
-//AluSelect
-//`define OpSelLen 3
-//`define LOGIC_OP 3'b001
-
-/////////////////////////////////////////////////////////////////
-//`define OPLen 7
-//`define OpSelLen 3
-
 //B inst    B-type
 `define op_B        7'b1100011
 `define op_BEQ      3'b000

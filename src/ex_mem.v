@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`include "config.v"
 
 module ex_mem(
     input wire clk,

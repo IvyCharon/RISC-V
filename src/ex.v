@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`include "config.v"
 
 module ex(
     input wire rst,
@@ -11,11 +12,14 @@ module ex(
 
     input reg [`ALU_Len - 1 : 0]    alu_op,
     input reg [`Jump_Len - 1 : 0]   jump_op,
-    input reg [`Branch_Len - 1 : 0] branch_op
+    input reg [`Branch_Len - 1 : 0] branch_op,
 
     output reg [`RegLen - 1 : 0]     rd_data_o,
     output reg [`RegAddrLen - 1 : 0] rd_addr,
-    output reg rd_enable_o
+    output reg rd_enable_o,
+
+    output reg [`AddrLen - 1 : 0] mem_addr_o
+
     );
 
     reg [`RegLen - 1 : 0] res;
@@ -27,42 +31,33 @@ module ex(
         end
         else begin
             case (alu_op)
-                `ADDI:  res = reg1 + Imm; 
-                `SLTI:  res = $signed(reg1) < $signed(Imm) ? 32'b1 : 32'b0;
-                `SLTIU: res = reg1 < Imm ? 32'b1 : 32'b0;
-                `XORI:  res = reg1 ^ Imm;
-                `ORI:   res = reg1 | Imm;
-                `ANDI:  res = reg1 & Imm;
-                `SLLI:  res = reg1 << reg2[4:0];
-                `SRLI:  res = reg1 >> reg2[4:0];
-                `SRAI:  res = $signed(reg1) >> reg2[4:0];
+                `LUI         : res = reg2;
+                `AUIPC       : res = reg1 + reg2;
+                `ADD,`ADDI   : res = reg1 + reg2;
+                `SUB         : res = reg1 - reg2;
+                `SLL,`SLLI   : res = reg1 << reg2[4:0];
+                `SLT,`SLTI   : res = $signed(reg1) < $signed(reg2) ? 32'b1 : 32'b0;
+                `XOR,`XORI   : res = reg1 ^ reg2;
+                `OR,`ORI     : res = reg1 | reg2;
+                `AND,`ANDI   : res = reg1 & reg2;
+                `SRL,`SRLI   : res = reg1 >> reg2[4:0];
+                `SRA,`SRAI   : res = $signed(reg1) >> reg2[4:0];
+                `SLTU,`SLTIU : res = reg1 < reg2 ? 32'b1 : 32'b0;
+                
+                //具体取位数操作在MEM进行
+                `LB          : res = reg1 + reg2;
+                `LH          : res = reg1 + reg2;
+                `LW          : res = reg1 + reg2;
+                `LBU         : res = reg1 + reg2;
+                `LHU         : res = reg1 + reg2;
 
-                `ADD:   res = reg1 + reg2;
-                `SUB:   res = reg1 - reg2;
-                `SLL:   res = reg1 << reg2[4:0];
-                `SLT:   res = $signed(reg1) < $signed(reg2) ? 1 : 0;
-                `XOR:   res = reg1 ^ reg2;
-                `OR:    res = reg1 | reg2;
-                `AND:   res = reg1 & reg2;
-                `SRL:   res = reg1 >> reg2[4:0];
-                `SRA:   res = $signed(reg1) >> reg2[4:0];
+                `SB          : res = reg1 + reg2;
+                `SH          : res = reg1 + reg2;
+                `SW          : res = reg1 + reg2;
 
-                `LB: 
-                `LH:
-                `LW:
-                `LBU:
-                `LHU:
+                `JUMP        : res = reg1 + 32'h4;
 
-                `SB:
-                `SH:
-                `SW:
-
-                `LUI:   res = Imm;
-                `AUIPC: //pc+Imm
-                //where to find pc? stored in reg1?
-
-                `JUMP:
-                `BRANCH:
+                `BRANCH      : res = `ZERO_WORD;
 
                 default:
                     res = `ZERO_WORD;
@@ -80,9 +75,10 @@ module ex(
             rd_enable_o = rd_enable;
             case (alu_op)
                 `BRANCH: rd_data_o = `ZERO_WORD;
-                `SB:     rd_data_o = `ZERO_WORD;
-                `SH:     rd_data_o = `ZERO_WORD;
-                `SW:     rd_data_o = `ZERO_WORD;
+                `LB,`LH,`LW,`LBU,`LHU,`SB,`SH,`SW: begin
+                    mem_addr_o = res;
+                    rd_data_o = `ZERO_WORD;
+                end
                 default: rd_data_o = res;
             endcase
         end

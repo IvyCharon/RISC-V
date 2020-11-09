@@ -1,10 +1,12 @@
 // RISCV32I CPU top module
 // port modification allowed for debugging purposes
+`include "config.v"
 
 module cpu(
 	input  wire                    clk_in,			// system clock signal
     input  wire                    rst_in,			// reset signal
     input  wire [`RegLen - 1 : 0]  rom_data_i,
+
     output wire [`InstLen - 1 : 0] rom_addr_o,
     output wire 				   rom_ce_o
     );
@@ -27,15 +29,19 @@ module cpu(
     wire [`RegLen - 1 : 0] 	   reg2_read_enable;
 
     //ID -> ID/EX
-    wire [`OpCodeLen - 1 : 0] id_aluop;
-    wire [`OpSelLen - 1 : 0]  id_alusel;
-    wire [`RegLen - 1 : 0]    id_reg1, id_reg2, id_Imm, id_rd;
+    wire [`OpCodeLen - 1 : 0]  id_aluop;
+    wire [`OpSelLen - 1 : 0]   id_alusel;
+	wire [`ALU_Len - 1 : 0]    id_alu;
+    wire [`Jump_Len - 1 : 0]   id_jump;
+    wire [`Branch_Len - 1 : 0] id_branch;
+    wire [`RegLen - 1 : 0]     id_reg1, id_reg2, id_Imm, id_rd;
     wire id_rd_enable;
 
     //ID/EX -> EX
-    wire [`OpCodeLen - 1 : 0] ex_aluop;
-    wire [`OpSelLen - 1 : 0]  ex_alusel;
-	wire [`RegLen - 1 : 0]    ex_reg1, ex_reg2, ex_Imm, ex_rd;
+    wire [`ALU_Len - 1 : 0]    ex_alu;
+    wire [`Jump_Len - 1 : 0]   ex_jump;
+    wire [`Branch_Len - 1 : 0] ex_branch;
+	wire [`RegLen - 1 : 0]     ex_reg1, ex_reg2, ex_Imm, ex_rd;
 	wire ex_rd_enable_i;
 
 	//EX -> EX/MEM
@@ -64,6 +70,7 @@ module cpu(
 	pc_reg pc_reg0(
     	.clk(clk_in),
         .rst(rst_in),
+
         .pc(pc),
         .chip_enable(rom_ce_o)
 	);
@@ -73,6 +80,7 @@ module cpu(
         .rst(rst_in),
         .if_pc(pc),
       	.if_inst(rom_data_i),
+		
     	.id_pc(id_pc_i),
       	.id_inst(id_inst_i)
 	);
@@ -83,6 +91,7 @@ module cpu(
       	.inst(id_inst_i),
       	.reg1_data_i(reg1_data),
       	.reg2_data_i(reg2_data), 
+		
       	.reg1_addr_o(reg1_addr),
       	.reg1_read_enable(reg1_read_enable),
       	.reg2_addr_o(reg2_addr),
@@ -92,8 +101,9 @@ module cpu(
       	.Imm(id_Imm),
       	.rd(id_rd),
       	.rd_enable(id_rd_enable),
-      	.aluop(id_aluop),
-      	.alusel(id_alusel)
+		.alu_op(id_alu),
+		.jump_op(id_jump),
+		.branch_op(id_branch)
 	);
       
 	register register0(
@@ -118,15 +128,18 @@ module cpu(
       	.id_Imm(id_Imm),
       	.id_rd(id_rd),
       	.id_rd_enable(id_rd_enable),
-      	.id_aluop(id_aluop),
-      	.id_alusel(id_alusel),
+      	.id_alu_op(id_alu),
+      	.id_jump_op(id_jump),
+		.id_branch_op(id_branch),
+
       	.ex_reg1(ex_reg1),
       	.ex_reg2(ex_reg2),
       	.ex_Imm(ex_Imm),
       	.ex_rd(ex_rd),
       	.ex_rd_enable(ex_rd_enable_i),
-      	.ex_aluop(ex_aluop),
-      	.ex_alusel(ex_alusel)
+      	.ex_alu_op(ex_alu),
+      	.ex_jump_op(ex_jump),
+		.ex_branch_op(ex_branch)
 	);
 
 	ex ex0(
@@ -136,8 +149,9 @@ module cpu(
       	.Imm(ex_Imm),
       	.rd(ex_rd),
       	.rd_enable(ex_rd_enable_i),
-      	.aluop(ex_aluop),
-      	.alusel(ex_alusel),
+      	.alu_op(ex_alu),
+      	.jump_op(ex_jump),
+		.branch_op(ex_branch),
       	.rd_data_o(ex_rd_data),
       	.rd_addr(ex_rd_addr),
       	.rd_enable_o(ex_rd_enable_o)

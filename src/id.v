@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`include "config.v"
 
 module id(
     input wire rst,
@@ -45,7 +46,7 @@ module id(
 
     always @(*) begin
         case (opcode)
-            `op_I: begin //I-type
+            `op_I: begin                //I-type
                 rd = inst[11 : 7];
                 rd_enable = `WriteEnable;
                 reg1_read_enable = `ReadEnable;
@@ -78,7 +79,7 @@ module id(
                 endcase
 
             end
-            `op_L: begin //I-type
+            `op_L: begin                //I-type
                 rd = inst[11 : 7];
                 rd_enable = `WriteEnable;
                 reg1_read_enable = `ReadEnable;
@@ -102,7 +103,7 @@ module id(
                 endcase
                 
             end
-            `op_JALR: begin //I-type
+            `op_JALR: begin             //I-type
                 rd = inst[11 : 7];
                 rd_enable = `WriteEnable;
                 reg1_read_enable = `ReadEnable;
@@ -206,7 +207,7 @@ module id(
                 endcase
                 
             end
-            `op_LUI: begin    //U-type
+            `op_LUI: begin              //U-type
                 rd_enable = `WriteEnable;
                 rd = inst[11 : 7];
                 reg1_read_enable = `ReadDisable;
@@ -223,7 +224,7 @@ module id(
                 funct7 = `funct7Zero;
                 
             end
-            `op_AUIPC: begin    //U-type
+            `op_AUIPC: begin            //U-type
                 rd_enable = `WriteEnable;
                 rd = inst[11 : 7];
                 reg1_read_enable = `ReadDisable;
@@ -279,6 +280,9 @@ module id(
     always @ (*) begin
         if (rst == `ResetEnable) begin
             reg1 = `ZERO_WORD;
+        end
+        else if(alu_op == `AUIPC || alu_op == `JUMP) begin
+            reg1 = pc;
         end
         else if (reg1_read_enable == `ReadDisable) begin
             reg1 = `ZERO_WORD;
