@@ -5,23 +5,87 @@ module mem(
     input rst,
     input wire [`RegLen - 1 : 0]     rd_data_i,
     input wire [`RegAddrLen - 1 : 0] rd_addr_i,
+    input wire [`AddrLen - 1 : 0]    mem_addr_i,
+    input reg  [`InstLen - 1 : 0]    mem_wdata_i,
+    input reg  [`ALU_Len - 1 : 0]    alu_op,
     input wire rd_enable_i,
+
+    input reg  [`InstLen - 1 : 0]    mem_data,
 
     output reg [`RegLen - 1 : 0]     rd_data_o,
     output reg [`RegAddrLen - 1 : 0] rd_addr_o,
-    output reg rd_enable_o
+    output reg rd_enable_o,
+
+    output reg [`InstLen - 1 : 0] mem_wdata_o,
+    output reg [`AddrLen - 1 : 0] mem_waddr_o,
+    output reg [`memwType - 1 : 0] mem_write_type,
+    output reg mem_write,
+    output reg mem_read
     );
 
     always @ (*) begin
         if (rst == `ResetEnable) begin
-            rd_data_o = `ZERO_WORD;
-            rd_addr_o = `RegAddrLen'h0;
+            rd_data_o   = `ZERO_WORD;
+            rd_addr_o   = `RegAddrLen'h0;
             rd_enable_o = `WriteDisable;
         end
         else begin
-            rd_data_o = rd_data_i;
             rd_addr_o = rd_addr_i;
-            rd_enable_o = rd_enable_i;
+            rd_enable_o = rd_enable_i; 
+            case (alu_op)
+                `LB : begin
+                    rd_data_o = {{24{mem_data[7]}},mem_data[7:0]};
+                    mem_write = `WriteDisable;
+                    mem_read = `ReadEnable;
+                end
+                `LW : begin
+                    rd_data_o = mem_data;
+                    mem_write = `WriteDisable;
+                    mem_read = `ReadEnable;
+                end
+                `LH : begin
+                    rd_data_o = {{16{mem_data[15]}},mem_data[15:0]};
+                    mem_write = `WriteDisable;
+                    mem_read = `ReadEnable;
+                end
+                `LBU: begin
+                    rd_data_o = {{24{1'b0}},mem_data[7:0]};
+                    mem_write = `WriteDisable;
+                    mem_read = `ReadEnable;
+                end
+                `LHU: begin
+                    rd_data_o = {{16{1'b0}},mem_data[15:0]};
+                    mem_write = `WriteDisable;
+                    mem_read = `ReadEnable;
+                end
+                `SB : begin
+                    mem_waddr_o = rd_data_i;
+                    mem_wdata_o = {{24{1'b0}},mem_wdata_i[7:0]};
+                    mem_write_type = `sb;
+                    mem_write = `WriteEnable;
+                    mem_read = `ReadDisable;
+                    rd_addr_o = `ZERO_WORD;
+                end
+                `SH : begin
+                    mem_waddr_o = rd_data_i;
+                    mem_wdata_o = {{16{1'b0}},mem_wdata_i[15:0]};
+                    mem_write_type = `sh;
+                    mem_write = `WriteEnable;
+                    mem_read = `ReadDisable;
+                    rd_addr_o = `ZERO_WORD;
+                end
+                `SW : begin
+                    mem_waddr_o = rd_data_i;
+                    mem_wdata_o = mem_wdata_i;
+                    mem_write_type = `sw;
+                    mem_write = `WriteEnable;
+                    mem_read = `ReadDisable;
+                    rd_addr_o = `ZERO_WORD;
+                end
+                default: begin
+                    rd_data_o = rd_data_i;  
+                end  
+            endcase
         end
     end
 

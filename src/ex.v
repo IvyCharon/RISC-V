@@ -18,11 +18,15 @@ module ex(
     output reg [`RegAddrLen - 1 : 0] rd_addr,
     output reg rd_enable_o,
 
-    output reg [`AddrLen - 1 : 0] mem_addr_o
+    output reg [`AddrLen - 1 : 0] mem_addr_o,
+    output reg [`ALU_Len - 1 : 0] alu_op_o,
+    output reg [`InstLen - 1 : 0] mem_wdata_o
 
     );
 
     reg [`RegLen - 1 : 0] res;
+    assign alu_op_o = alu_op;
+    assign mem_wdata_o = reg2;
 
     //Do the calculation
     always @ (*) begin
