@@ -7,10 +7,10 @@ module cpu(
     input  wire                    rst_in,			// reset signal
     input  wire [`RegLen - 1 : 0]  rom_data_i,
 
-	input wire [`InstLen - 1 : 0] ram_data_i,
-
     output wire [`InstLen - 1 : 0] rom_addr_o,
     output wire 				   rom_ce_o,
+
+	input wire [`InstLen - 1 : 0] ram_data_i,
 
 	output wire [`InstLen - 1 : 0]  ram_wdata_o,
     output wire [`AddrLen - 1 : 0]  ram_waddr_o,
