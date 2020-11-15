@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`include "config.vh"
 
 module rom(
     input wire ce,
@@ -16,7 +17,7 @@ module rom(
             inst = `ZERO_WORD;
         end
         else begin
-            inst = inst_mem[addr[17:2]];
+            inst = inst_mem[addr[17:2]];    //why addr[17:2]?
         end
     end
 endmodule

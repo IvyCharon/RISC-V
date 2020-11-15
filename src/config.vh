@@ -18,6 +18,10 @@
 `define ReadDisable   1'b0
 `define ImmUsed       1'b1
 `define ImmNotUsed    1'b0
+`define BranchEnable  1'b1
+`define BranchDisable 1'b0
+`define JumpEnable    1'b1
+`define JumpDisable   1'b0
 
 `define RAM_SIZE      100
 `define RAM_SIZELOG2  17
@@ -137,6 +141,12 @@
 
 //
 `define memwType 2
-`define sb 0
-`define sh 1
-`define sw 2
+`define No_mem_write 0
+`define sb 1
+`define sh 2
+`define sw 3
+
+`define StallLen       2
+`define NoStall        0
+`define Stall_next_two 1
+`define Stall_next_one 2

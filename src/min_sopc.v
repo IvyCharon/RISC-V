@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`include "config.vh"
 
 module min_sopc(
     input wire clk,
@@ -8,7 +9,7 @@ module min_sopc(
     wire [`AddrLen - 1 : 0] rom_addr;
     wire rom_ce;
     wire [`InstLen - 1 : 0] inst;
-
+    
     cpu cpu0(
         .clk_in(clk),
         .rst_in(rst),

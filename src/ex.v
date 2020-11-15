@@ -1,26 +1,29 @@
 `timescale 1ns / 1ps
-`include "config.v"
+`include "config.vh"
 
 module ex(
     input wire rst,
 
+    //from id_ex.v
     input wire [`RegLen - 1 : 0] reg1,
     input wire [`RegLen - 1 : 0] reg2,
     input wire [`RegLen - 1 : 0] Imm,
     input wire [`RegLen - 1 : 0] rd,
     input wire rd_enable,
-
     input reg [`ALU_Len - 1 : 0]    alu_op,
     input reg [`Jump_Len - 1 : 0]   jump_op,
     input reg [`Branch_Len - 1 : 0] branch_op,
+    input reg [`AddrLen - 1 ：0]    addr_for_rd,
+    input reg [`StallLen - 1 : 0]   stall_flag,
 
+    //to ex_mem.v
     output reg [`RegLen - 1 : 0]     rd_data_o,
     output reg [`RegAddrLen - 1 : 0] rd_addr,
     output reg rd_enable_o,
-
     output reg [`AddrLen - 1 : 0] mem_addr_o,
     output reg [`ALU_Len - 1 : 0] alu_op_o,
-    output reg [`InstLen - 1 : 0] mem_wdata_o
+    output reg [`InstLen - 1 : 0] mem_wdata_o,
+    output reg [`StallLen - 1 : 0] stall_flag_o
 
     );
 
@@ -30,7 +33,7 @@ module ex(
 
     //Do the calculation
     always @ (*) begin
-        if (rst == `ResetEnable) begin
+        if (rst == `ResetEnable || stall_flag == `Stall_next_one || stall_flag == `Stall_next_two) begin
             res = `ZERO_WORD;
         end
         else begin
@@ -59,7 +62,7 @@ module ex(
                 `SH          : res = reg1 + reg2;
                 `SW          : res = reg1 + reg2;
 
-                `JUMP        : res = reg1 + 32'h4;
+                `JUMP        : res = addr_for_rd;
 
                 `BRANCH      : res = `ZERO_WORD;
 
@@ -71,19 +74,34 @@ module ex(
 
     //Determine the output
     always @ (*) begin
-        if (rst == `ResetEnable) begin
+        if (rst == `ResetEnable || stall_flag == `Stall_next_one || stall_flag == `Stall_next_two) begin
             rd_enable_o = `WriteDisable;
+            rd_addr = `ZERO_WORD;
+            rd_data_o = `ZERO_WORD;
+            mem_addr_o = `ZERO_WORD;
+            mem_wdata_o = `ZERO_WORD;
+            alu_op_o = `NoAlu;
+            if(stall_flag == `Stall_next_one || stall_flag == Stall_next_two) begin
+                stall_flag_o = stall_flag;
+            end
+            else stall_flag_o = `NoStall;
         end
         else begin 
             rd_addr = rd;
             rd_enable_o = rd_enable;
             case (alu_op)
-                `BRANCH: rd_data_o = `ZERO_WORD;
+                `BRANCH: begin
+                    rd_data_o = `ZERO_WORD;
+                    mem_addr_o = `ZERO_WORD;
+                end
                 `LB,`LH,`LW,`LBU,`LHU,`SB,`SH,`SW: begin
                     mem_addr_o = res;
                     rd_data_o = `ZERO_WORD;
                 end
-                default: rd_data_o = res;
+                default: begin
+                    rd_data_o = res;
+                    mem_addr_o = `ZERO_WORD;
+                end
             endcase
         end
     end

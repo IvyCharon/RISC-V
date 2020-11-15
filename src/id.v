@@ -1,37 +1,50 @@
 `timescale 1ns / 1ps
-`include "config.v"
+`include "config.vh"
 
 module id(
     input wire rst,
+
+    //from if_id.v
     input wire [`AddrLen - 1 : 0] pc,
     input wire [`InstLen - 1 : 0] inst,
+    input wire [`StallLen - 1 : 0] stall_flag_i,
+
+    //from register.v
     input wire [`RegLen - 1 : 0]  reg1_data_i,
     input wire [`RegLen - 1 : 0]  reg2_data_i,
 
-    //To Register
+    //to register.v
     output reg [`RegAddrLen - 1 : 0] reg1_addr_o,
     output reg [`RegLen - 1 : 0]     reg1_read_enable,
     output reg [`RegAddrLen - 1 : 0] reg2_addr_o,
     output reg [`RegLen - 1 : 0]     reg2_read_enable,
 
-    //To next stage
+    //to id_ex.v
     output reg [`RegLen - 1 : 0] reg1,
     output reg [`RegLen - 1 : 0] reg2,
     output reg [`RegLen - 1 : 0] Imm,
     output reg [`RegLen - 1 : 0] rd,
     output reg rd_enable,
-
     output reg [`ALU_Len - 1 : 0]    alu_op,
     output reg [`Jump_Len - 1 : 0]   jump_op,
-    output reg [`Branch_Len - 1 : 0] branch_op
+    output reg [`Branch_Len - 1 : 0] branch_op,
+    output reg [`AddrLen - 1 ：0] addr_for_rd,
+    output reg [`StallLen - 1 : 0] stall_flag_o,
+
+    //to pc_reg.v
+    output reg jump_flag,
+    output reg [`AddrLen - 1 : 0] jump_addr,
+    output reg [`StallLen - 1 : 0] stall_flag_to_pc
+
     );
 
     wire [`OpLen - 1 : 0] opcode = inst[`OpLen - 1 : 0];
     reg useImmInstead;
+    reg [`RegLen - 1 : 0] imm_branch = { {20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 0 };
     
     //Decode: Get opcode, imm, rd, and the addr of rs1&rs2
     always @ (*) begin
-        if (rst == `ResetEnable) begin
+        if (rst == `ResetEnable || stall_flag_i == `Stall_next_one || stall_flag_i == `Stall_next_two) begin
             reg1_addr_o = `ZeroReg;
             reg2_addr_o = `ZeroReg;
         end
@@ -45,6 +58,25 @@ module id(
     reg [funct7Len - 1 : 0] funct7; 
 
     always @(*) begin
+        reg1_addr_o = `ZERO_WORD;
+        reg1_read_enable = `ReadDisable;
+        reg2_addr_o = `ZERO_WORD;
+        reg2_read_enable = `ReadDisable;
+
+        Imm = `ZERO_WORD;
+        rd = `ZeroReg;
+        rd_enable = `WriteDisable;
+
+        alu_op = `NoAlu;
+        jump_op = `NoJump;
+        branch_op = `NoBranch;
+
+        jump_flag = `JumpDisable;
+        jump_addr = `ZERO_WORD;
+        addr_for_rd = `ZERO_WORD;
+
+        stall_flag = `NoStall;
+
         case (opcode)
             `op_I: begin                //I-type
                 rd = inst[11 : 7];
@@ -108,8 +140,8 @@ module id(
                 rd_enable = `WriteEnable;
                 reg1_read_enable = `ReadEnable;
                 reg2_read_enable = `ReadDisable;
-                Imm = { {20{inst[31]}} ,inst[31:20] };
-                useImmInstead = `ImmUsed;
+                Imm = `ZERO_WORD;
+                useImmInstead = `ImmNotUsed;
 
                 funct3 = inst[14:12];
                 funct7 = inst[31:25];
@@ -118,6 +150,10 @@ module id(
 
                 jump_op = `JALR;
                 branch_op = `NoBranch;
+
+                addr_for_rd = pc + `AddrLen'h4;
+                jump_flag = `JumpEnable;
+                jump_addr = reg1 + { {20{0}} ,inst[31:20] };
                 
             end
             `op_R: begin                //R-type
@@ -164,8 +200,8 @@ module id(
                 rd = `ZeroReg;
                 reg1_read_enable = `ReadEnable;
                 reg2_read_enable = `ReadEnable;
-                Imm = { {20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 0 };
-                useImmInstead = `ImmUsed;
+                Imm = `ZERO_WORD;
+                useImmInstead = `ImmNotUsed;
 
                 funct3 = inst[14:12];
                 funct7 = `funct7Zero;
@@ -174,14 +210,38 @@ module id(
 
                 jump_op = `NoJump;
 
+                addr_for_rd = `ZERO_WORD;
+                jump_addr = pc + imm_branch;
+
                 case (funct3)
-                    `op_BEQ:  branch_op = `BEQ;
-                    `op_BNE:  branch_op = `BNE;
-                    `op_BLT:  branch_op = `BLT;
-                    `op_BGE:  branch_op = `BGE;
-                    `op_BLTU: branch_op = `BLTU;
-                    `op_BGEU: branch_op = `BGEU;
-                    default:  branch_op = `NoBranch;
+                    `op_BEQ: begin
+                        branch_op = `BEQ;
+                        jump_flag = (reg1 == reg2) ? `JumpEnable : `JumpDisable;
+                    end
+                    `op_BNE: begin
+                        branch_op = `BNE;
+                        jump_flag = (reg1 != reg2) ? `JumpEnable : `JumpDisable;
+                    end
+                    `op_BLT: begin
+                        branch_op = `BLT;
+                        jump_flag = ($signed(reg1) < $signed(reg2)) ? `JumpEnable : `JumpDisable;
+                    end
+                    `op_BGE: begin
+                        branch_op = `BGE;
+                        jump_flag = ($signed(reg1) >= $signed(reg2)) ? `JumpEnable : `JumpDisable;
+                    end
+                    `op_BLTU: begin
+                        branch_op = `BLTU;
+                        jump_flag = (reg1 < reg2) ? `JumpEnable : `JumpDisable;
+                    end
+                    `op_BGEU: begin
+                        branch_op = `BGEU;
+                        jump_flag = (reg1 >= reg2) ? `JumpEnable : `JumpDisable;
+                    end
+                    default: begin
+                        branch_op = `NoBranch;
+                        jump_flag = `JumpDisable;
+                    end
                 endcase
                 
             end
@@ -198,6 +258,8 @@ module id(
 
                 jump_op = `NoJump;
                 branch_op = `NoBranch;
+                stall_flag_to_pc = `Stall_next_two;
+                stall_flag_o = `Stall_next_one;
 
                 case (funct3)
                     `op_SB:  alu_op = `SB;
@@ -246,8 +308,8 @@ module id(
                 rd = inst[11:7];
                 reg1_read_enable = `ReadDisable;
                 reg2_read_enable = `ReadDisable;
-                Imm = { {12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 0};
-                useImmInstead = `ImmUsed;
+                Imm = `ZERO_WORD;
+                useImmInstead = `ImmNotUsed;
 
                 alu_op = `JUMP;
 
@@ -256,10 +318,14 @@ module id(
 
                 funct3 = `funct3Zero;
                 funct7 = `funct7Zero;
+
+                addr_for_rd = pc + `AddrLen'h4;
+                jump_flag = `JumpEnable;
+                jump_addr = pc + { {12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 0};
                 
             end
             default: begin
-                        Imm = `ZERO_WORD;
+                Imm = `ZERO_WORD;
                 rd_enable = `WriteDisable;
                 reg1_read_enable = `ReadDisable;
                 reg2_read_enable = `ReadDisable;
@@ -274,14 +340,17 @@ module id(
                 useImmInstead = `ImmNotUsed;
             end
         endcase
+        if(jump_flag || stall_flag_i != `NoStall) stall_flag_o = `Stall_next_one;
+        else if(stall_flag != `NoStall) stall_flag_o = stall_flag_i;
+        else stall_flag_o = `NoStall;
     end
 
     //Get rs1
     always @ (*) begin
-        if (rst == `ResetEnable) begin
+        if (rst == `ResetEnable || stall_flag_i == `Stall_next_one || stall_flag_i == `Stall_next_two) begin
             reg1 = `ZERO_WORD;
         end
-        else if(alu_op == `AUIPC || alu_op == `JUMP) begin
+        else if(alu_op == `AUIPC) begin
             reg1 = pc;
         end
         else if (reg1_read_enable == `ReadDisable) begin
@@ -294,7 +363,7 @@ module id(
 
     //Get rs2
     always @ (*) begin
-        if (rst == `ResetEnable) begin
+        if (rst == `ResetEnable || stall_flag_i == `Stall_next_one || stall_flag_i == `Stall_next_two) begin
             reg2 = `ZERO_WORD;
         end
         else if (reg2_read_enable == `ReadDisable) begin

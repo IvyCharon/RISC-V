@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`include "config.vh"
 
 module min_sopc_test();
     reg CLOCK_50, rst;
