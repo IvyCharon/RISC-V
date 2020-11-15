@@ -20,9 +20,9 @@ module ex(
     output reg [`RegLen - 1 : 0]     rd_data_o,
     output reg [`RegAddrLen - 1 : 0] rd_addr,
     output reg rd_enable_o,
-    output reg [`AddrLen - 1 : 0] mem_addr_o,
-    output reg [`ALU_Len - 1 : 0] alu_op_o,
-    output reg [`InstLen - 1 : 0] mem_wdata_o,
+    output reg [`AddrLen - 1 : 0]  mem_addr_o,
+    output reg [`ALU_Len - 1 : 0]  alu_op_o,
+    output reg [`InstLen - 1 : 0]  mem_wdata_o,
     output reg [`StallLen - 1 : 0] stall_flag_o
 
     );
@@ -76,11 +76,11 @@ module ex(
     always @ (*) begin
         if (rst == `ResetEnable || stall_flag == `Stall_next_one || stall_flag == `Stall_next_two) begin
             rd_enable_o = `WriteDisable;
-            rd_addr = `ZERO_WORD;
-            rd_data_o = `ZERO_WORD;
-            mem_addr_o = `ZERO_WORD;
+            rd_addr     = `ZERO_WORD;
+            rd_data_o   = `ZERO_WORD;
+            mem_addr_o  = `ZERO_WORD;
             mem_wdata_o = `ZERO_WORD;
-            alu_op_o = `NoAlu;
+            alu_op_o    = `NoAlu;
             if(stall_flag == `Stall_next_one || stall_flag == Stall_next_two) begin
                 stall_flag_o = stall_flag;
             end
@@ -91,15 +91,15 @@ module ex(
             rd_enable_o = rd_enable;
             case (alu_op)
                 `BRANCH: begin
-                    rd_data_o = `ZERO_WORD;
+                    rd_data_o  = `ZERO_WORD;
                     mem_addr_o = `ZERO_WORD;
                 end
                 `LB,`LH,`LW,`LBU,`LHU,`SB,`SH,`SW: begin
                     mem_addr_o = res;
-                    rd_data_o = `ZERO_WORD;
+                    rd_data_o  = `ZERO_WORD;
                 end
                 default: begin
-                    rd_data_o = res;
+                    rd_data_o  = res;
                     mem_addr_o = `ZERO_WORD;
                 end
             endcase

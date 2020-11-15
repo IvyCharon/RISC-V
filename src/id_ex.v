@@ -32,28 +32,28 @@ module id_ex(
 
     always @ (posedge clk) begin
         if (rst == `ResetEnable) begin
-            ex_reg1 <= `ZERO_WORD;
-            ex_reg2 <= `ZERO_WORD;
-            ex_Imm <= `ZERO_WORD;
-            ex_rd <= `ZERO_WORD;
-            ex_rd_enable <= `WriteDisable;
-            ex_alu_op <= `NoAlu;
-            ex_jump_op <= `NoJump;
-            ex_branch_op <= `NoBranch;
+            ex_reg1        <= `ZERO_WORD;
+            ex_reg2        <= `ZERO_WORD;
+            ex_Imm         <= `ZERO_WORD;
+            ex_rd          <= `ZERO_WORD;
+            ex_rd_enable   <= `WriteDisable;
+            ex_alu_op      <= `NoAlu;
+            ex_jump_op     <= `NoJump;
+            ex_branch_op   <= `NoBranch;
             ex_addr_for_rd <= `ZERO_WORD;
-            ex_stall_flag <= `NoStall;
+            ex_stall_flag  <= `NoStall;
         end
         else begin
-            ex_reg1 <= id_reg1;
-            ex_reg2 <= id_reg2;
-            ex_Imm <= id_Imm;
-            ex_rd <= id_rd;
-            ex_rd_enable <= id_rd_enable;
-            ex_alu_op <= id_alu_op;
-            ex_jump_op <= id_jump_op;
-            ex_branch_op <= id_branch_op;
+            ex_reg1        <= id_reg1;
+            ex_reg2        <= id_reg2;
+            ex_Imm         <= id_Imm;
+            ex_rd          <= id_rd;
+            ex_rd_enable   <= id_rd_enable;
+            ex_alu_op      <= id_alu_op;
+            ex_jump_op     <= id_jump_op;
+            ex_branch_op   <= id_branch_op;
             ex_addr_for_rd <= id_addr_for_rd;
-            ex_stall_flag <= id_stall_flag;
+            ex_stall_flag  <= id_stall_flag;
         end
     end
 

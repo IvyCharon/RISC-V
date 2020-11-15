@@ -7,14 +7,14 @@ module pc_reg(
 
     //from id.v
     input wire JumpFlag,
-    input wire [`AddrLen - 1 : 0] jump_addr,
+    input wire [`AddrLen - 1 : 0]  jump_addr,
     input wire [`StallLen - 1 : 0] stall_flag_id,
 
     //from register.v/write part
     input wire [`StallLen - 1 : 0] stall_flag_wb,
     
     //to if_id.v
-    output reg [`AddrLen - 1 : 0] pc,
+    output reg [`AddrLen - 1 : 0]  pc,
     output reg [`StallLen - 1 : 0] stall_flag_o,
 
     //to what?

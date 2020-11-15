@@ -26,21 +26,21 @@ module ex_mem(
 
     always @ (posedge clk) begin
         if (rst == `ResetEnable) begin
-            mem_rd_data <= `ZERO_WORD;
-            mem_rd_addr <= `RegAddrLen'h0;
-            mem_rd_enable <= `WriteDisable;
-            mem_mem_addr <= `ZERO_WORD;
-            mem_alu_op <= `NoAlu;
-            mem_mem_wdata <= `ZERO_WORD;
+            mem_rd_data    <= `ZERO_WORD;
+            mem_rd_addr    <= `RegAddrLen'h0;
+            mem_rd_enable  <= `WriteDisable;
+            mem_mem_addr   <= `ZERO_WORD;
+            mem_alu_op     <= `NoAlu;
+            mem_mem_wdata  <= `ZERO_WORD;
             mem_stall_flag <= `NoStall;
         end
         else begin
-            mem_rd_data <= ex_rd_data;
-            mem_rd_addr <= ex_rd_addr;
-            mem_rd_enable <= ex_rd_enable;
-            mem_mem_addr <= ex_mem_addr;
-            mem_alu_op <= ex_alu_op;
-            mem_mem_wdata <= ex_mem_wdata;
+            mem_rd_data    <= ex_rd_data;
+            mem_rd_addr    <= ex_rd_addr;
+            mem_rd_enable  <= ex_rd_enable;
+            mem_mem_addr   <= ex_mem_addr;
+            mem_alu_op     <= ex_alu_op;
+            mem_mem_wdata  <= ex_mem_wdata;
             mem_stall_flag <= ex_stall_flag;
         end
     end

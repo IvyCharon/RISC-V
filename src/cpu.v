@@ -10,7 +10,7 @@ module cpu(
     output wire [`InstLen - 1 : 0] rom_addr_o,
     output wire 				   rom_ce_o,
 
-	input wire [`InstLen - 1 : 0] ram_data_i,
+	input wire [`InstLen - 1 : 0]  ram_data_i,
 
 	output wire [`InstLen - 1 : 0]  ram_wdata_o,
     output wire [`AddrLen - 1 : 0]  ram_waddr_o,
@@ -22,29 +22,29 @@ module cpu(
 	assign rom_addr_o = pc;
 
 	//pc_reg -> if_id
-	wire [`AddrLen - 1 : 0] pc;
+	wire [`AddrLen - 1 : 0]  pc;
     wire [`StallLen - 1 : 0] stall_flag_pc_ifd;
 
 	//id -> id_ex
-	wire [`RegLen - 1 : 0] id_reg1_o;
-    wire [`RegLen - 1 : 0] id_reg2_o;
-    wire [`RegLen - 1 : 0] id_Imm_o;
-    wire [`RegLen - 1 : 0] id_rd_o;
-    wire id_rd_enable_o;
+	wire [`RegLen - 1 : 0]	   id_reg1_o;
+    wire [`RegLen - 1 : 0]	   id_reg2_o;
+    wire [`RegLen - 1 : 0]     id_Imm_o;
+    wire [`RegLen - 1 : 0] 	   id_rd_o;
+    wire 					   id_rd_enable_o;
     wire [`ALU_Len - 1 : 0]    id_alu_op_o;
     wire [`Jump_Len - 1 : 0]   id_jump_op_o;
     wire [`Branch_Len - 1 : 0] id_branch_op_o;
-    wire [`AddrLen - 1 ：0] id_addr_for_rd_o;
-    wire [`StallLen - 1 : 0] id_stall_flag_o;
+    wire [`AddrLen - 1 ：0]    id_addr_for_rd_o;
+    wire [`StallLen - 1 : 0]   id_stall_flag_o;
 
 	//id -> pc_reg
-	wire pc_jump_flag;
-    wire [`AddrLen - 1 : 0] pc_jump_addr;
+	wire 					 pc_jump_flag;
+    wire [`AddrLen - 1 : 0]  pc_jump_addr;
     wire [`StallLen - 1 : 0] stall_flag_to_pc;
 
 	//if_id -> id
-	wire [`AddrLen - 1 : 0] id_pc_i;
-    wire [`InstLen - 1 : 0] id_inst_i;
+	wire [`AddrLen - 1 : 0]  id_pc_i;
+    wire [`InstLen - 1 : 0]  id_inst_i;
     wire [`StallLen - 1 : 0] id_stall_flag_i;
 
 	//ex_id -> ex
@@ -63,9 +63,9 @@ module cpu(
 	wire [`RegLen - 1 : 0]     ex_rd_data_i;
     wire [`RegAddrLen - 1 : 0] ex_rd_addr_i;
     wire ex_rd_enable_i;
-    wire [`AddrLen - 1 : 0] ex_mem_addr_i;
-    wire [`ALU_Len - 1 : 0] ex_alu_op_i;
-    wire [`InstLen - 1 : 0] ex_mem_wdata_i;
+    wire [`AddrLen - 1 : 0]  ex_mem_addr_i;
+    wire [`ALU_Len - 1 : 0]  ex_alu_op_i;
+    wire [`InstLen - 1 : 0]  ex_mem_wdata_i;
     wire [`StallLen - 1 : 0] ex_stall_flag_i;
 
 	//ex_mem -> mem
@@ -81,7 +81,7 @@ module cpu(
 	wire [`RegLen - 1 : 0]     mem_rd_data_o;
     wire [`RegAddrLen - 1 : 0] mem_rd_addr_o;
     wire mem_rd_enable_o;
-    wire [`StallLen - 1 : 0] mem_stall_flag_o;
+    wire [`StallLen - 1 : 0]   mem_stall_flag_o;
 
 	//mem_wb -> register
 	wire [`RegLen - 1 : 0]     wb_rd_data_i;

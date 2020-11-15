@@ -134,17 +134,17 @@
 `define BGEU       6
 
 //
-`define funct3Len 3
+`define funct3Len  3
 `define funct3Zero 0'b000
-`define funct7Len 7
+`define funct7Len  7
 `define funct7Zero 0'b0000000
 
 //
-`define memwType 2
+`define memwType     2
 `define No_mem_write 0
-`define sb 1
-`define sh 2
-`define sw 3
+`define sb           1
+`define sh           2
+`define sw           3
 
 `define StallLen       2
 `define NoStall        0

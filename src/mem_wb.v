@@ -20,15 +20,15 @@ module mem_wb(
 
     always @ (posedge clk) begin
         if (rst == `ResetEnable) begin
-            wb_rd_data <= `ZERO_WORD;
-            wb_rd_addr <= `RegAddrLen'h0;
-            wb_rd_enable <= `WriteDisable;
+            wb_rd_data    <= `ZERO_WORD;
+            wb_rd_addr    <= `RegAddrLen'h0;
+            wb_rd_enable  <= `WriteDisable;
             wb_stall_flag <= `NoStall;
         end
         else begin
-            wb_rd_data <= mem_rd_data;
-            wb_rd_addr <= mem_rd_addr;
-            wb_rd_enable <= mem_rd_enable;
+            wb_rd_data    <= mem_rd_data;
+            wb_rd_addr    <= mem_rd_addr;
+            wb_rd_enable  <= mem_rd_enable;
             wb_stall_flag <= mem_stall_flag;
         end
     end

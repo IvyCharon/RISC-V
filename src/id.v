@@ -28,12 +28,12 @@ module id(
     output reg [`ALU_Len - 1 : 0]    alu_op,
     output reg [`Jump_Len - 1 : 0]   jump_op,
     output reg [`Branch_Len - 1 : 0] branch_op,
-    output reg [`AddrLen - 1 ：0] addr_for_rd,
-    output reg [`StallLen - 1 : 0] stall_flag_o,
+    output reg [`AddrLen - 1 ：0]    addr_for_rd,
+    output reg [`StallLen - 1 : 0]   stall_flag_o,
 
     //to pc_reg.v
     output reg jump_flag,
-    output reg [`AddrLen - 1 : 0] jump_addr,
+    output reg [`AddrLen - 1 : 0]  jump_addr,
     output reg [`StallLen - 1 : 0] stall_flag_to_pc
 
     );
@@ -58,38 +58,38 @@ module id(
     reg [funct7Len - 1 : 0] funct7; 
 
     always @(*) begin
-        reg1_addr_o = `ZERO_WORD;
+        reg1_addr_o      = `ZERO_WORD;
         reg1_read_enable = `ReadDisable;
-        reg2_addr_o = `ZERO_WORD;
+        reg2_addr_o      = `ZERO_WORD;
         reg2_read_enable = `ReadDisable;
 
-        Imm = `ZERO_WORD;
-        rd = `ZeroReg;
+        Imm       = `ZERO_WORD;
+        rd        = `ZeroReg;
         rd_enable = `WriteDisable;
 
-        alu_op = `NoAlu;
-        jump_op = `NoJump;
+        alu_op    = `NoAlu;
+        jump_op   = `NoJump;
         branch_op = `NoBranch;
 
-        jump_flag = `JumpDisable;
-        jump_addr = `ZERO_WORD;
+        jump_flag   = `JumpDisable;
+        jump_addr   = `ZERO_WORD;
         addr_for_rd = `ZERO_WORD;
 
         stall_flag = `NoStall;
 
         case (opcode)
             `op_I: begin                //I-type
-                rd = inst[11 : 7];
-                rd_enable = `WriteEnable;
+                rd               = inst[11 : 7];
+                rd_enable        = `WriteEnable;
                 reg1_read_enable = `ReadEnable;
                 reg2_read_enable = `ReadDisable;
-                Imm = { {20{inst[31]}} ,inst[31:20] };
-                useImmInstead = `ImmUsed;
+                Imm              = { {20{inst[31]}} ,inst[31:20] };
+                useImmInstead    = `ImmUsed;
 
                 funct3 = inst[14:12];
                 funct7 = inst[31:25];
 
-                jump_op = `NoJump;
+                jump_op   = `NoJump;
                 branch_op = `NoBranch;
 
                 case (funct3)
@@ -112,17 +112,17 @@ module id(
 
             end
             `op_L: begin                //I-type
-                rd = inst[11 : 7];
-                rd_enable = `WriteEnable;
+                rd               = inst[11 : 7];
+                rd_enable        = `WriteEnable;
                 reg1_read_enable = `ReadEnable;
                 reg2_read_enable = `ReadDisable;
-                Imm = { {20{inst[31]}} ,inst[31:20] };
-                useImmInstead = `ImmUsed;
+                Imm              = { {20{inst[31]}} ,inst[31:20] };
+                useImmInstead    = `ImmUsed;
 
                 funct3 = inst[14:12];
                 funct7 = inst[31:25];
 
-                jump_op = `NoJump;
+                jump_op   = `NoJump;
                 branch_op = `NoBranch;
 
                 case (funct3)
@@ -136,38 +136,38 @@ module id(
                 
             end
             `op_JALR: begin             //I-type
-                rd = inst[11 : 7];
-                rd_enable = `WriteEnable;
+                rd               = inst[11 : 7];
+                rd_enable        = `WriteEnable;
                 reg1_read_enable = `ReadEnable;
                 reg2_read_enable = `ReadDisable;
-                Imm = `ZERO_WORD;
-                useImmInstead = `ImmNotUsed;
+                Imm              = `ZERO_WORD;
+                useImmInstead    = `ImmNotUsed;
 
                 funct3 = inst[14:12];
                 funct7 = inst[31:25];
 
                 alu_op = `JUMP;
 
-                jump_op = `JALR;
+                jump_op   = `JALR;
                 branch_op = `NoBranch;
 
                 addr_for_rd = pc + `AddrLen'h4;
-                jump_flag = `JumpEnable;
-                jump_addr = reg1 + { {20{0}} ,inst[31:20] };
+                jump_flag   = `JumpEnable;
+                jump_addr   = reg1 + { {20{0}} ,inst[31:20] };
                 
             end
             `op_R: begin                //R-type
-                rd = inst[11:7];
-                rd_enable = `WriteEnable;
+                rd               = inst[11:7];
+                rd_enable        = `WriteEnable;
                 reg1_read_enable = `ReadEnable;
                 reg2_read_enable = `ReadEnable;
-                Imm = `ZERO_WORD;
-                useImmInstead = `ImmNotUsed;
+                Imm              = `ZERO_WORD;
+                useImmInstead    = `ImmNotUsed;
 
                 funct3 = inst[14:12];
                 funct7 = inst[31:25];
 
-                jump_op = `NoJump;
+                jump_op   = `NoJump;
                 branch_op = `NoBranch;
 
                 case (funct3)
@@ -196,12 +196,12 @@ module id(
 
             end
             `op_B: begin                //B-type
-                rd_enable = `WriteDisable;
-                rd = `ZeroReg;
+                rd_enable        = `WriteDisable;
+                rd               = `ZeroReg;
                 reg1_read_enable = `ReadEnable;
                 reg2_read_enable = `ReadEnable;
-                Imm = `ZERO_WORD;
-                useImmInstead = `ImmNotUsed;
+                Imm              = `ZERO_WORD;
+                useImmInstead    = `ImmNotUsed;
 
                 funct3 = inst[14:12];
                 funct7 = `funct7Zero;
@@ -211,7 +211,7 @@ module id(
                 jump_op = `NoJump;
 
                 addr_for_rd = `ZERO_WORD;
-                jump_addr = pc + imm_branch;
+                jump_addr   = pc + imm_branch;
 
                 case (funct3)
                     `op_BEQ: begin
@@ -246,20 +246,20 @@ module id(
                 
             end
             `op_S: begin                //S-type
-                rd_enable = `WriteDisable;
-                rd = `ZeroReg;
+                rd_enable        = `WriteDisable;
+                rd               = `ZeroReg;
                 reg1_read_enable = `ReadEnable;
                 reg2_read_enable = `ReadEnable;
-                Imm = { {20{inst[31]}}, inst[31:25], inst[11:8], inst[7] };
-                useImmInstead = `ImmUsed;
+                Imm              = { {20{inst[31]}}, inst[31:25], inst[11:8], inst[7] };
+                useImmInstead    = `ImmUsed;
 
                 funct3 = inst[14:12];
                 funct7 = `funct7Zero;
 
-                jump_op = `NoJump;
-                branch_op = `NoBranch;
+                jump_op          = `NoJump;
+                branch_op        = `NoBranch;
                 stall_flag_to_pc = `Stall_next_two;
-                stall_flag_o = `Stall_next_one;
+                stall_flag_o     = `Stall_next_one;
 
                 case (funct3)
                     `op_SB:  alu_op = `SB;
@@ -270,16 +270,16 @@ module id(
                 
             end
             `op_LUI: begin              //U-type
-                rd_enable = `WriteEnable;
-                rd = inst[11 : 7];
+                rd_enable        = `WriteEnable;
+                rd               = inst[11 : 7];
                 reg1_read_enable = `ReadDisable;
                 reg2_read_enable = `ReadDisable;
-                Imm = { inst[31:12], {12{0}}};
-                useImmInstead = `ImmUsed;
+                Imm              = { inst[31:12], {12{0}}};
+                useImmInstead    = `ImmUsed;
 
                 alu_op = `LUI;
 
-                jump_op = `NoJump;
+                jump_op   = `NoJump;
                 branch_op = `NoBranch;
 
                 funct3 = `funct3Zero;
@@ -287,60 +287,60 @@ module id(
                 
             end
             `op_AUIPC: begin            //U-type
-                rd_enable = `WriteEnable;
-                rd = inst[11 : 7];
+                rd_enable        = `WriteEnable;
+                rd               = inst[11 : 7];
                 reg1_read_enable = `ReadDisable;
                 reg2_read_enable = `ReadDisable;
-                Imm = { inst[31:12], {12{0}}};
-                useImmInstead = `ImmUsed;
+                Imm              = { inst[31:12], {12{0}}};
+                useImmInstead    = `ImmUsed;
 
                 alu_op = `AUIPC;
 
                 funct3 = `funct3Zero;
                 funct7 = `funct7Zero;
 
-                jump_op = `NoJump;
+                jump_op   = `NoJump;
                 branch_op = `NoBranch;
                 
             end
             `op_JAL: begin              //J-type
-                rd_enable = `WriteEnable;
-                rd = inst[11:7];
+                rd_enable        = `WriteEnable;
+                rd               = inst[11:7];
                 reg1_read_enable = `ReadDisable;
                 reg2_read_enable = `ReadDisable;
-                Imm = `ZERO_WORD;
-                useImmInstead = `ImmNotUsed;
+                Imm              = `ZERO_WORD;
+                useImmInstead    = `ImmNotUsed;
 
                 alu_op = `JUMP;
 
-                jump_op = `JAL;
+                jump_op   = `JAL;
                 branch_op = `NoBranch;
 
                 funct3 = `funct3Zero;
                 funct7 = `funct7Zero;
 
                 addr_for_rd = pc + `AddrLen'h4;
-                jump_flag = `JumpEnable;
-                jump_addr = pc + { {12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 0};
+                jump_flag   = `JumpEnable;
+                jump_addr   = pc + { {12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 0};
                 
             end
             default: begin
-                Imm = `ZERO_WORD;
-                rd_enable = `WriteDisable;
+                Imm              = `ZERO_WORD;
+                rd_enable        = `WriteDisable;
                 reg1_read_enable = `ReadDisable;
                 reg2_read_enable = `ReadDisable;
-                rd = `ZeroReg;
-                funct3 = `funct3Zero;
-                funct7 = `funct7Zero;
+                rd               = `ZeroReg;
+                funct3           = `funct3Zero;
+                funct7           = `funct7Zero;
 
-                jump_op = `NoJump;
+                jump_op   = `NoJump;
                 branch_op = `NoBranch;
-                alu_op = `NoAlu;
+                alu_op    = `NoAlu;
         
                 useImmInstead = `ImmNotUsed;
             end
         endcase
-        if(jump_flag || stall_flag_i != `NoStall) stall_flag_o = `Stall_next_one;
+        if (jump_flag || stall_flag_i != `NoStall) stall_flag_o = `Stall_next_one;
         else if(stall_flag != `NoStall) stall_flag_o = stall_flag_i;
         else stall_flag_o = `NoStall;
     end
