@@ -146,7 +146,11 @@
 `define sh           2
 `define sw           3
 
+//////////////////////////////////
 `define StallLen       2
 `define NoStall        0
 `define Stall_next_two 1
 `define Stall_next_one 2
+
+`define Stop   1'b1
+`define NoStop 1'b0

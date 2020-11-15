@@ -7,6 +7,7 @@ module id(
     //from if_id.v
     input wire [`AddrLen - 1 : 0] pc,
     input wire [`InstLen - 1 : 0] inst,
+    //////////////////
     input wire [`StallLen - 1 : 0] stall_flag_i,
 
     //from register.v
@@ -29,11 +30,14 @@ module id(
     output reg [`Jump_Len - 1 : 0]   jump_op,
     output reg [`Branch_Len - 1 : 0] branch_op,
     output reg [`AddrLen - 1 ：0]    addr_for_rd,
+    //////////////
     output reg [`StallLen - 1 : 0]   stall_flag_o,
 
     //to pc_reg.v
     output reg jump_flag,
     output reg [`AddrLen - 1 : 0]  jump_addr,
+
+    ///////////////
     output reg [`StallLen - 1 : 0] stall_flag_to_pc
 
     );
