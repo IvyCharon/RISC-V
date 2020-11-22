@@ -12,6 +12,13 @@ module id(
     input wire [`RegLen - 1 : 0]  reg1_data_i,
     input wire [`RegLen - 1 : 0]  reg2_data_i,
 
+    //
+    input wire is_in_dalayslot_i,
+
+    //
+    output reg is_in_dalayslot_o,
+    output reg next_in_delayslot_o,
+
     //to register.v
     output reg [`RegAddrLen - 1 : 0] reg1_addr_o,
     output reg [`RegLen - 1 : 0]     reg1_read_enable,
@@ -39,6 +46,8 @@ module id(
     wire [`OpLen - 1 : 0] opcode = inst[`OpLen - 1 : 0];
     reg useImmInstead;
     reg [`RegLen - 1 : 0] imm_branch = { {20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 0 };
+
+    assign stallreq = 1'b0;
     
     //Decode: Get opcode, imm, rd, and the addr of rs1&rs2
     always @ (*) begin
@@ -72,6 +81,9 @@ module id(
         jump_flag   = `JumpDisable;
         jump_addr   = `ZERO_WORD;
         addr_for_rd = `ZERO_WORD;
+
+        is_in_dalayslot_o   = `NoDelay;
+        next_in_delayslot_o = `NoDelay;
 
         case (opcode)
             `op_I: begin                //I-type
@@ -150,6 +162,8 @@ module id(
                 addr_for_rd = pc + `AddrLen'h4;
                 jump_flag   = `JumpEnable;
                 jump_addr   = reg1 + { {20{0}} ,inst[31:20] };
+
+                next_in_delayslot_o = `Delay;
                 
             end
             `op_R: begin                //R-type
@@ -213,30 +227,37 @@ module id(
                     `op_BEQ: begin
                         branch_op = `BEQ;
                         jump_flag = (reg1 == reg2) ? `JumpEnable : `JumpDisable;
+                        next_in_delayslot_o = (reg1 == reg2) ? `Delay : `NoDelay;
                     end
                     `op_BNE: begin
                         branch_op = `BNE;
                         jump_flag = (reg1 != reg2) ? `JumpEnable : `JumpDisable;
+                        next_in_delayslot_o = (reg1 != reg2) ? `Delay : `NoDelay;
                     end
                     `op_BLT: begin
                         branch_op = `BLT;
                         jump_flag = ($signed(reg1) < $signed(reg2)) ? `JumpEnable : `JumpDisable;
+                        next_in_delayslot_o = ($signed(reg1) < $signed(reg2)) ? `Delay : `NoDelay;
                     end
                     `op_BGE: begin
                         branch_op = `BGE;
                         jump_flag = ($signed(reg1) >= $signed(reg2)) ? `JumpEnable : `JumpDisable;
+                        next_in_delayslot_o = ($signed(reg1) >= $signed(reg2)) ? `Delay : `NoDelay;
                     end
                     `op_BLTU: begin
                         branch_op = `BLTU;
                         jump_flag = (reg1 < reg2) ? `JumpEnable : `JumpDisable;
+                        next_in_delayslot_o = (reg1 < reg2) ? `Delay : `NoDelay;
                     end
                     `op_BGEU: begin
                         branch_op = `BGEU;
                         jump_flag = (reg1 >= reg2) ? `JumpEnable : `JumpDisable;
+                        next_in_delayslot_o = (reg1 >= reg2) ? `Delay : `NoDelay;
                     end
                     default: begin
                         branch_op = `NoBranch;
                         jump_flag = `JumpDisable;
+                        next_in_delayslot_o = `NoDelay;
                     end
                 endcase
                 
@@ -316,6 +337,8 @@ module id(
                 addr_for_rd = pc + `AddrLen'h4;
                 jump_flag   = `JumpEnable;
                 jump_addr   = pc + { {12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 0};
+
+                next_in_delayslot_o = `Delay;
                 
             end
             default: begin
@@ -363,6 +386,16 @@ module id(
         end
         else begin
             reg2 = reg2_data_i;
+        end
+    end
+
+    //delayslot
+    always @ (*) begin
+        if (rst == `ResetEnable) begin
+            is_in_dalayslot_o = `NoDelay;
+        end
+        else begin
+            is_in_dalayslot_o = is_in_dalayslot_i;
         end
     end
 
