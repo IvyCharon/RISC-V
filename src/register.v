@@ -9,7 +9,7 @@ module register(
     input wire write_enable,
     input wire [`RegAddrLen - 1 : 0] write_addr,
     input wire [`RegLen - 1 : 0]     write_data,
-    input reg  [`StallLen - 1 : 0]   stall_flag,
+    input wire [`StallLen - 1 : 0]   stall_flag,
 
     //to pc_reg.v
     output reg [`StallLen - 1 : 0]   stall_flag_o,

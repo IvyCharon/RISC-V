@@ -8,19 +8,17 @@ module mem(
     input wire [`RegLen - 1 : 0]     rd_data_i,
     input wire [`RegAddrLen - 1 : 0] rd_addr_i,
     input wire [`AddrLen - 1 : 0]    mem_addr_i,
-    input reg  [`InstLen - 1 : 0]    mem_wdata_i,
-    input reg  [`ALU_Len - 1 : 0]    alu_op,
+    input wire [`InstLen - 1 : 0]    mem_wdata_i,
+    input wire [`ALU_Len - 1 : 0]    alu_op,
     input wire rd_enable_i,
-    input reg  [`StallLen - 1 : 0]   stall_flag,
 
     //from memory
-    input reg  [`InstLen - 1 : 0]    mem_data,
+    input wire [`InstLen - 1 : 0]    mem_data,
     
     //to mem_wb.v
     output reg [`RegLen - 1 : 0]     rd_data_o,
     output reg [`RegAddrLen - 1 : 0] rd_addr_o,
     output reg rd_enable_o,
-    output reg  [`StallLen - 1 : 0] stall_flag_o,
 
     //to memory
     output reg [`InstLen - 1 : 0]  mem_wdata_o,
@@ -31,7 +29,7 @@ module mem(
     );
 
     always @ (*) begin
-        if (rst == `ResetEnable || stall_flag == `Stall_next_one ||stall_flag == `Stall_next_two) begin
+        if (rst == `ResetEnable) begin
             rd_data_o      = `ZERO_WORD;
             rd_addr_o      = `RegAddrLen'h0;
             rd_enable_o    = `WriteDisable;
@@ -40,13 +38,10 @@ module mem(
             mem_write_type = `No_mem_write;
             mem_write      = `WriteDisable;
             mem_read       = `ReadDisable;
-            if(stall_flag == `Stall_next_one ||stall_flag == `Stall_next_two) stall_flag_o = stall_flag;
-            else stall_flag_o = `NoStall;
         end
         else begin
             rd_addr_o    = rd_addr_i;
             rd_enable_o  = rd_enable_i; 
-            stall_flag_o = `NoStall;
             case (alu_op)
                 `LB : begin
                     rd_data_o      = {{24{mem_data[7]}},mem_data[7:0]};

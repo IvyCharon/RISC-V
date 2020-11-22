@@ -7,8 +7,6 @@ module id(
     //from if_id.v
     input wire [`AddrLen - 1 : 0] pc,
     input wire [`InstLen - 1 : 0] inst,
-    //////////////////
-    input wire [`StallLen - 1 : 0] stall_flag_i,
 
     //from register.v
     input wire [`RegLen - 1 : 0]  reg1_data_i,
@@ -30,16 +28,12 @@ module id(
     output reg [`Jump_Len - 1 : 0]   jump_op,
     output reg [`Branch_Len - 1 : 0] branch_op,
     output reg [`AddrLen - 1 ：0]    addr_for_rd,
-    //////////////
-    output reg [`StallLen - 1 : 0]   stall_flag_o,
 
     //to pc_reg.v
     output reg jump_flag,
     output reg [`AddrLen - 1 : 0]  jump_addr,
 
-    ///////////////
-    output reg [`StallLen - 1 : 0] stall_flag_to_pc
-
+    output reg stallreq
     );
 
     wire [`OpLen - 1 : 0] opcode = inst[`OpLen - 1 : 0];
@@ -48,7 +42,7 @@ module id(
     
     //Decode: Get opcode, imm, rd, and the addr of rs1&rs2
     always @ (*) begin
-        if (rst == `ResetEnable || stall_flag_i == `Stall_next_one || stall_flag_i == `Stall_next_two) begin
+        if (rst == `ResetEnable) begin
             reg1_addr_o = `ZeroReg;
             reg2_addr_o = `ZeroReg;
         end
@@ -78,8 +72,6 @@ module id(
         jump_flag   = `JumpDisable;
         jump_addr   = `ZERO_WORD;
         addr_for_rd = `ZERO_WORD;
-
-        stall_flag = `NoStall;
 
         case (opcode)
             `op_I: begin                //I-type
@@ -262,8 +254,6 @@ module id(
 
                 jump_op          = `NoJump;
                 branch_op        = `NoBranch;
-                stall_flag_to_pc = `Stall_next_two;
-                stall_flag_o     = `Stall_next_one;
 
                 case (funct3)
                     `op_SB:  alu_op = `SB;
@@ -344,14 +334,11 @@ module id(
                 useImmInstead = `ImmNotUsed;
             end
         endcase
-        if (jump_flag || stall_flag_i != `NoStall) stall_flag_o = `Stall_next_one;
-        else if(stall_flag != `NoStall) stall_flag_o = stall_flag_i;
-        else stall_flag_o = `NoStall;
     end
 
     //Get rs1
     always @ (*) begin
-        if (rst == `ResetEnable || stall_flag_i == `Stall_next_one || stall_flag_i == `Stall_next_two) begin
+        if (rst == `ResetEnable) begin
             reg1 = `ZERO_WORD;
         end
         else if(alu_op == `AUIPC) begin
@@ -367,7 +354,7 @@ module id(
 
     //Get rs2
     always @ (*) begin
-        if (rst == `ResetEnable || stall_flag_i == `Stall_next_one || stall_flag_i == `Stall_next_two) begin
+        if (rst == `ResetEnable) begin
             reg2 = `ZERO_WORD;
         end
         else if (reg2_read_enable == `ReadDisable) begin

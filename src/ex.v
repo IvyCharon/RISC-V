@@ -10,11 +10,10 @@ module ex(
     input wire [`RegLen - 1 : 0] Imm,
     input wire [`RegLen - 1 : 0] rd,
     input wire rd_enable,
-    input reg [`ALU_Len - 1 : 0]    alu_op,
-    input reg [`Jump_Len - 1 : 0]   jump_op,
-    input reg [`Branch_Len - 1 : 0] branch_op,
-    input reg [`AddrLen - 1 ：0]    addr_for_rd,
-    input reg [`StallLen - 1 : 0]   stall_flag,
+    input wire [`ALU_Len - 1 : 0]    alu_op,
+    input wire [`Jump_Len - 1 : 0]   jump_op,
+    input wire [`Branch_Len - 1 : 0] branch_op,
+    input wire [`AddrLen - 1 ：0]    addr_for_rd,
 
     //to ex_mem.v
     output reg [`RegLen - 1 : 0]     rd_data_o,
@@ -22,9 +21,7 @@ module ex(
     output reg rd_enable_o,
     output reg [`AddrLen - 1 : 0]  mem_addr_o,
     output reg [`ALU_Len - 1 : 0]  alu_op_o,
-    output reg [`InstLen - 1 : 0]  mem_wdata_o,
-    output reg [`StallLen - 1 : 0] stall_flag_o
-
+    output reg [`InstLen - 1 : 0]  mem_wdata_o
     );
 
     reg [`RegLen - 1 : 0] res;
@@ -33,7 +30,7 @@ module ex(
 
     //Do the calculation
     always @ (*) begin
-        if (rst == `ResetEnable || stall_flag == `Stall_next_one || stall_flag == `Stall_next_two) begin
+        if (rst == `ResetEnable) begin
             res = `ZERO_WORD;
         end
         else begin
@@ -74,17 +71,13 @@ module ex(
 
     //Determine the output
     always @ (*) begin
-        if (rst == `ResetEnable || stall_flag == `Stall_next_one || stall_flag == `Stall_next_two) begin
+        if (rst == `ResetEnable) begin
             rd_enable_o = `WriteDisable;
             rd_addr     = `ZERO_WORD;
             rd_data_o   = `ZERO_WORD;
             mem_addr_o  = `ZERO_WORD;
             mem_wdata_o = `ZERO_WORD;
             alu_op_o    = `NoAlu;
-            if(stall_flag == `Stall_next_one || stall_flag == Stall_next_two) begin
-                stall_flag_o = stall_flag;
-            end
-            else stall_flag_o = `NoStall;
         end
         else begin 
             rd_addr = rd;
