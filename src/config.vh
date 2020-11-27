@@ -1,6 +1,7 @@
 `timescale 1ns / 1ps
 
 `define ZERO_WORD  32'h00000000
+`define ZeroReg    5'b00000
 
 `define InstLen     32
 `define AddrLen     32

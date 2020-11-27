@@ -12,6 +12,19 @@ module id(
     input wire [`RegLen - 1 : 0]  reg1_data_i,
     input wire [`RegLen - 1 : 0]  reg2_data_i,
 
+    //to handle forwarding from ex
+    input wire [`RegAddrLen - 1 : 0] ex_rd_addr,
+    input wire ex_rd_write,
+    input wire [`RegLen - 1 : 0] ex_rd_data,
+
+    //to judge last instr
+    input wire [`ALU_Len - 1 : 0] ex_alu_op,
+
+    //to handle forwarding from mem
+    input wire [`RegAddrLen - 1 : 0] mem_rd_addr,
+    input wire mem_rd_write,
+    input wire [`RegLen - 1 : 0] mem_rd_data,
+
     //
     input wire is_in_dalayslot_i,
 
@@ -47,7 +60,9 @@ module id(
     reg useImmInstead;
     reg [`RegLen - 1 : 0] imm_branch = { {20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 0 };
 
-    assign stallreq = 1'b0;
+    reg stall_reg1, stall_reg2;
+
+    assign stallreq = stall_reg1 | stall_reg2;
     
     //Decode: Get opcode, imm, rd, and the addr of rs1&rs2
     always @ (*) begin
@@ -63,6 +78,9 @@ module id(
 
     reg [funct3Len - 1 : 0] funct3;
     reg [funct7Len - 1 : 0] funct7; 
+
+    wire pre_inst;
+    assign pre_inst = (ex_alu_op == LW || ex_alu_op == LB || ex_alu_op == LH || ex_alu_op == LBU || ex_alu_op == LHU) ? 1 : 0;
 
     always @(*) begin
         reg1_addr_o      = `ZERO_WORD;
@@ -361,11 +379,21 @@ module id(
 
     //Get rs1
     always @ (*) begin
+        stall_reg1 = 1'b0;
         if (rst == `ResetEnable) begin
             reg1 = `ZERO_WORD;
         end
+        else if(pre_inst && ex_rd_addr == reg1_addr_o && ex_rd_write) begin
+            stall_reg1 = 1'b1;
+        end
         else if(alu_op == `AUIPC) begin
             reg1 = pc;
+        end
+        else if(reg1_read_enable == `ReadEnable && reg1_addr_o == ex_rd_addr && ex_rd_write == `WriteEnable && reg1_addr_o != `ZeroReg) begin
+            reg1 = ex_rd_data;
+        end
+        else if(reg1_read_enable == `ReadEnable && reg1_addr_o == mem_rd_addr && mem_rd_write == `WriteEnable && reg1_addr_o != `ZeroReg) begin
+            reg1 = mem_rd_data;
         end
         else if (reg1_read_enable == `ReadDisable) begin
             reg1 = `ZERO_WORD;
@@ -377,8 +405,18 @@ module id(
 
     //Get rs2
     always @ (*) begin
+        stall_reg2 = 1'b0;
         if (rst == `ResetEnable) begin
             reg2 = `ZERO_WORD;
+        end
+        else if(pre_inst && ex_rd_addr == reg2_addr_o && ex_rd_write) begin
+            stall_reg2 = 1'b1;
+        end
+        else if(reg2_read_enable == `ReadEnable && reg2_addr_o == ex_rd_addr && ex_rd_write == `WriteEnable && reg2_addr_o != `ZeroReg) begin
+            reg2 = ex_rd_data;
+        end
+        else if(reg2_read_enable == `ReadEnable && reg2_addr_o == mem_rd_addr && mem_rd_write == `WriteEnable && reg2_addr_o != `ZeroReg) begin
+            reg2 = mem_rd_data;
         end
         else if (reg2_read_enable == `ReadDisable) begin
             if (useImmInstead == `ImmNotUsed) reg2 = `ZERO_WORD;

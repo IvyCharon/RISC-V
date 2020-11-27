@@ -9,10 +9,6 @@ module register(
     input wire write_enable,
     input wire [`RegAddrLen - 1 : 0] write_addr,
     input wire [`RegLen - 1 : 0]     write_data,
-    input wire [`StallLen - 1 : 0]   stall_flag,
-
-    //to pc_reg.v
-    output reg [`StallLen - 1 : 0]   stall_flag_o,
 
     //read 1, from id.v
     input wire read_enable1,   
@@ -32,15 +28,9 @@ module register(
     
     //write 1
     always @ (posedge clk) begin
-        if (rst == `ResetDisable && write_enable == `WriteEnable && stall_flag == `NoStall) begin
+        if (rst == `ResetDisable && write_enable == `WriteEnable) begin
             if (write_addr != `RegAddrLen'h0) //not zero register
                 regs[write_addr] <= write_data;
-        end
-        else begin
-            case (stall_flag)
-                `Stall_next_two: stall_flag_o = `Stall_next_one; 
-                default: stall_flag_o = `NoStall;
-            endcase
         end
     end
 
@@ -50,7 +40,7 @@ module register(
             if (read_addr1 == `RegAddrLen'h0)
                 read_data1 = `ZERO_WORD;
             else if (read_addr1 == write_addr && write_enable == `WriteEnable)
-                read_data1 = write_data;    //forwarding
+                read_data1 = write_data;    //forwarding for WB -> ID
             else
                 read_data1 = regs[read_addr1];
         end
