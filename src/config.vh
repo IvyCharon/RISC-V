@@ -146,7 +146,3 @@
 `define sb           1
 `define sh           2
 `define sw           3
-
-//
-`define NoDelay 1'b0
-`define Delay   1'b1

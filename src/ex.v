@@ -14,7 +14,6 @@ module ex(
     input wire [`Jump_Len - 1 : 0]   jump_op,
     input wire [`Branch_Len - 1 : 0] branch_op,
     input wire [`AddrLen - 1 ：0]    addr_for_rd,
-    input wire is_in_delayslot,
 
     //to ex_mem.v
     output reg [`RegLen - 1 : 0]     rd_data_o,

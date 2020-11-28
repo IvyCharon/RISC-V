@@ -17,8 +17,6 @@ module id_ex(
     input wire [`Jump_Len - 1 : 0]   id_jump_op,
     input wire [`Branch_Len - 1 : 0] id_branch_op,
     input wire [`AddrLen - 1 ：0]    id_addr_for_rd,
-    input wire id_is_in_delayslot,
-    input wire next_in_delayslot,
 
     //to ex.v
     output reg [`RegLen - 1 : 0] ex_reg1,
@@ -30,8 +28,6 @@ module id_ex(
     output reg [`Jump_Len - 1 : 0]   ex_jump_op,
     output reg [`Branch_Len - 1 : 0] ex_branch_op,
     output reg [`AddrLen - 1 ：0]    ex_addr_for_rd,
-    output reg ex_is_in_delayslot,
-    output reg is_in_delayslot_o
     );
 
     always @ (posedge clk) begin
@@ -45,8 +41,6 @@ module id_ex(
             ex_jump_op     <= `NoJump;
             ex_branch_op   <= `NoBranch;
             ex_addr_for_rd <= `ZERO_WORD;
-            ex_is_in_delayslot <= `NoDelay;
-            is_in_delayslot_o  <= `NoDelay;
         end
         else if (stall[2] && !stall[3]) begin
             ex_reg1        <= `ZERO_WORD;
@@ -58,8 +52,6 @@ module id_ex(
             ex_jump_op     <= `NoJump;
             ex_branch_op   <= `NoBranch;
             ex_addr_for_rd <= `ZERO_WORD;
-            ex_is_in_delayslot <= `NoDelay;
-            is_in_delayslot_o  <= `NoDelay;
         end
         else begin
             ex_reg1        <= id_reg1;
@@ -71,8 +63,6 @@ module id_ex(
             ex_jump_op     <= id_jump_op;
             ex_branch_op   <= id_branch_op;
             ex_addr_for_rd <= id_addr_for_rd;
-            ex_is_in_delayslot <= id_is_in_delayslot;
-            is_in_delayslot_o  <= next_in_delayslot;
         end
     end
 
