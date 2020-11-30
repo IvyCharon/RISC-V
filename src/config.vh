@@ -142,11 +142,15 @@
 
 //
 `define memwType     2
-`define No_mem_write 0
-`define sb           1
-`define sh           2
-`define sw           3
+`define No_mem_type  0
+`define b            1
+`define h            2
+`define w            3
 
 //about i-cache
 `define i_cache_line 128 
 `define TagLen 22   //index: 8, byte select: 2
+
+//about read and write
+`define read  1'b0
+`define write 1'b1

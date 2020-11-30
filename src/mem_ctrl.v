@@ -10,7 +10,7 @@ module mem_ctrl(
     input wire mem_read,
     input wire [`AddrLen - 1 : 0] mem_data_addr,
     input wire [`InstLen - 1 : 0] mem_data_i,
-    input wire [`memwType - 1 : 0] mem_write_type,
+    input wire [`memwType - 1 : 0] mem_type,
 
     //from i_cache.v
     input wire icache_needed,
@@ -25,15 +25,16 @@ module mem_ctrl(
     output reg [`InstLen - 1 : 0] inst_icache,
 
     //from ram.v
-    input wire [`InstLen - 1 : 0] ram_data_i,
+    input wire [7 : 0] ram_data_i,
 
     //to ram.v
     output reg [`AddrLen - 1 : 0] ram_addr,
-    output reg [`InstLen - 1 : 0] ram_data,
-    output reg ram_write,
-    output reg ram_read
+    output reg [7 : 0] ram_data,
+    output reg wr   //0 for read, 1 for write
 
     );
+
+
 
 
     

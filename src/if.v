@@ -18,7 +18,7 @@ module if (
     //to i_cache.v
     output reg [`AddrLen - 1 : 0] addr,
 
-    //to pc_reg.v
+    //to ctrl.v
     output reg if_stall
 
     );
