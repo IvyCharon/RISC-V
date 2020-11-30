@@ -11,7 +11,7 @@ module pc_reg(
     input wire JumpFlag,
     input wire [`AddrLen - 1 : 0]  jump_addr,
 
-    //to if_id.v
+    //to if.v
     output reg [`AddrLen - 1 : 0]  pc,
 
     //to what?
