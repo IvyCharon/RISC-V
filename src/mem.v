@@ -22,7 +22,7 @@ module mem(
 
     //to memory
     output reg [`InstLen - 1 : 0]  mem_wdata_o,
-    output reg [`AddrLen - 1 : 0]  mem_waddr_o,
+    output reg [`AddrLen - 1 : 0]  mem_addr_o,
     output reg [`memwType - 1 : 0] mem_write_type,
     output reg mem_write,
     output reg mem_read
@@ -34,7 +34,7 @@ module mem(
             rd_addr_o      = `RegAddrLen'h0;
             rd_enable_o    = `WriteDisable;
             mem_wdata_o    = `ZERO_WORD;
-            mem_waddr_o    = `ZERO_WORD;
+            mem_addr_o     = `ZERO_WORD;
             mem_write_type = `No_mem_write;
             mem_write      = `WriteDisable;
             mem_read       = `ReadDisable;
@@ -45,46 +45,46 @@ module mem(
             case (alu_op)
                 `LB : begin
                     rd_data_o      = {{24{mem_data[7]}},mem_data[7:0]};
+                    mem_addr_o     = mem_addr_i;                    
                     mem_write      = `WriteDisable;
                     mem_read       = `ReadEnable;
                     mem_wdata_o    = `ZERO_WORD;
-                    mem_waddr_o    = `ZERO_WORD;
                     mem_write_type = `No_mem_write;
                 end
                 `LW : begin
                     rd_data_o      = mem_data;
+                    mem_addr_o     = mem_addr_i;
                     mem_write      = `WriteDisable;
                     mem_read       = `ReadEnable;
                     mem_wdata_o    = `ZERO_WORD;
-                    mem_waddr_o    = `ZERO_WORD;
                     mem_write_type = `No_mem_write;
                 end
                 `LH : begin
                     rd_data_o      = {{16{mem_data[15]}},mem_data[15:0]};
+                    mem_addr_o     = mem_addr_i;
                     mem_write      = `WriteDisable;
                     mem_read       = `ReadEnable;
                     mem_wdata_o    = `ZERO_WORD;
-                    mem_waddr_o    = `ZERO_WORD;
                     mem_write_type = `No_mem_write;
                 end
                 `LBU: begin
                     rd_data_o      = {{24{1'b0}},mem_data[7:0]};
+                    mem_addr_o     = mem_addr_i;
                     mem_write      = `WriteDisable;
                     mem_read       = `ReadEnable;
                     mem_wdata_o    = `ZERO_WORD;
-                    mem_waddr_o    = `ZERO_WORD;
                     mem_write_type = `No_mem_write;
                 end
                 `LHU: begin
                     rd_data_o      = {{16{1'b0}},mem_data[15:0]};
+                    mem_addr_o     = mem_addr_i;
                     mem_write      = `WriteDisable;
                     mem_read       = `ReadEnable;
                     mem_wdata_o    = `ZERO_WORD;
-                    mem_waddr_o    = `ZERO_WORD;
                     mem_write_type = `No_mem_write;
                 end
                 `SB : begin
-                    mem_waddr_o    = rd_data_i;
+                    mem_addr_o     = mem_addr_i;
                     mem_wdata_o    = {{24{1'b0}},mem_wdata_i[7:0]};
                     mem_write_type = `sb;
                     mem_write      = `WriteEnable;
@@ -92,7 +92,7 @@ module mem(
                     rd_addr_o      = `ZERO_WORD;
                 end
                 `SH : begin
-                    mem_waddr_o    = rd_data_i;
+                    mem_addr_o     = mem_addr_i;
                     mem_wdata_o    = {{16{1'b0}},mem_wdata_i[15:0]};
                     mem_write_type = `sh;
                     mem_write      = `WriteEnable;
@@ -100,7 +100,7 @@ module mem(
                     rd_addr_o      = `ZERO_WORD;
                 end
                 `SW : begin
-                    mem_waddr_o    = rd_data_i;
+                    mem_addr_o     = mem_addr_i;
                     mem_wdata_o    = mem_wdata_i;
                     mem_write_type = `sw;
                     mem_write      = `WriteEnable;
@@ -110,7 +110,7 @@ module mem(
                 default: begin
                     rd_data_o      = rd_data_i;  
                     mem_wdata_o    = `ZERO_WORD;
-                    mem_waddr_o    = `ZERO_WORD;
+                    mem_addr_o     = mem_addr_i;
                     mem_write_type = `No_mem_write;
                     mem_write      = `WriteDisable;
                     mem_read       = `ReadDisable;

@@ -29,13 +29,10 @@ module pc_reg(
         if (chip_enable == `ChipDisable) begin
             pc <= `ZERO_WORD;
         end
-        else if (stall[0]) begin
-            pc <= `ZERO_WORD;
-        end
-        else if (JumpFlag = `BranchEnable) begin
+        else if (!stall[0] && JumpFlag = `BranchEnable) begin
             pc <= jump_addr;
         end
-        else begin
+        else if(!stall[0]) begin
             pc <= pc + 4'h4;
         end
     end

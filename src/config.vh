@@ -146,3 +146,7 @@
 `define sb           1
 `define sh           2
 `define sw           3
+
+//about i-cache
+`define i_cache_line 128 
+`define TagLen 22   //index: 8, byte select: 2
