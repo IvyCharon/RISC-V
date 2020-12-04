@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 `include "config.vh"
 
 module i_cache (

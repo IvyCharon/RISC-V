@@ -1,4 +1,5 @@
 //put in riscv_top.v
+`timescale 1ns / 1ps
 `include "config.vh"
 
 module mem_ctrl(
