@@ -25,8 +25,8 @@ module mem(
     output reg [`InstLen - 1 : 0]  mem_wdata_o,
     output reg [`AddrLen - 1 : 0]  mem_addr_o,
     output reg [`memwType - 1 : 0] mem_type,
-    output reg mem_write,
-    output reg mem_read,
+    output reg mem_rw,
+    output reg mem_enable,
 
     //to ctrl.v
     output reg stallreq
@@ -40,8 +40,8 @@ module mem(
             mem_wdata_o  = `ZERO_WORD;
             mem_addr_o   = `ZERO_WORD;
             mem_type     = `No_mem_type;
-            mem_write    = `WriteDisable;
-            mem_read     = `ReadDisable;
+            mem_rw       = 1'b0;
+            mem_enable   = 1'b0;
             stallreq     = `NoStall;
         end
         else if (busy) begin
@@ -51,8 +51,8 @@ module mem(
             mem_wdata_o  = `ZERO_WORD;
             mem_addr_o   = `ZERO_WORD;
             mem_type     = `No_mem_type;
-            mem_write    = `WriteDisable;
-            mem_read     = `ReadDisable;
+            mem_rw       = 1'b0;
+            mem_enable   = 1'b0;
             stallreq     = `Stall;
         end
         else begin
@@ -62,40 +62,40 @@ module mem(
                 `LB : begin
                     rd_data_o    = {{24{mem_data[7]}},mem_data[7:0]};
                     mem_addr_o   = mem_addr_i;                    
-                    mem_write    = `WriteDisable;
-                    mem_read     = `ReadEnable;
+                    mem_rw       = `read;
+                    mem_enable   = 1'b1;
                     mem_wdata_o  = `ZERO_WORD;
                     mem_type     = `b;
                 end
                 `LW : begin
                     rd_data_o    = mem_data;
                     mem_addr_o   = mem_addr_i;
-                    mem_write    = `WriteDisable;
-                    mem_read     = `ReadEnable;
+                    mem_rw       = `read;
+                    mem_enable   = 1'b1;
                     mem_wdata_o  = `ZERO_WORD;
                     mem_type     = `w;
                 end
                 `LH : begin
                     rd_data_o    = {{16{mem_data[15]}},mem_data[15:0]};
                     mem_addr_o   = mem_addr_i;
-                    mem_write    = `WriteDisable;
-                    mem_read     = `ReadEnable;
+                    mem_rw       = `read;
+                    mem_enable   = 1'b1;
                     mem_wdata_o  = `ZERO_WORD;
                     mem_type     = `h;
                 end
                 `LBU: begin
                     rd_data_o    = {{24{1'b0}},mem_data[7:0]};
                     mem_addr_o   = mem_addr_i;
-                    mem_write    = `WriteDisable;
-                    mem_read     = `ReadEnable;
+                    mem_rw       = `read;
+                    mem_enable   = 1'b1;
                     mem_wdata_o  = `ZERO_WORD;
                     mem_type     = `b;
                 end
                 `LHU: begin
                     rd_data_o    = {{16{1'b0}},mem_data[15:0]};
                     mem_addr_o   = mem_addr_i;
-                    mem_write    = `WriteDisable;
-                    mem_read     = `ReadEnable;
+                    mem_rw       = `read;
+                    mem_enable   = 1'b1;
                     mem_wdata_o  = `ZERO_WORD;
                     mem_type     = `h;
                 end
@@ -103,8 +103,8 @@ module mem(
                     mem_addr_o   = mem_addr_i;
                     mem_wdata_o  = {{24{1'b0}},mem_wdata_i[7:0]};
                     mem_type     = `b;
-                    mem_write    = `WriteEnable;
-                    mem_read     = `ReadDisable;
+                    mem_rw       = `write;
+                    mem_enable   = 1'b1;
                     rd_addr_o    = `ZERO_WORD;
                     stallreq     = `NoStall;
                 end
@@ -112,8 +112,8 @@ module mem(
                     mem_addr_o   = mem_addr_i;
                     mem_wdata_o  = {{16{1'b0}},mem_wdata_i[15:0]};
                     mem_type     = `h;
-                    mem_write    = `WriteEnable;
-                    mem_read     = `ReadDisable;
+                    mem_rw       = `write;
+                    mem_enable   = 1'b1;
                     rd_addr_o    = `ZERO_WORD;
                     stallreq     = `NoStall;
                 end
@@ -121,8 +121,8 @@ module mem(
                     mem_addr_o   = mem_addr_i;
                     mem_wdata_o  = mem_wdata_i;
                     mem_type     = `w;
-                    mem_write    = `WriteEnable;
-                    mem_read     = `ReadDisable;
+                    mem_rw       = `write;
+                    mem_enable   = 1'b1;
                     rd_addr_o    = `ZERO_WORD;
                     stallreq     = `NoStall;
                 end
@@ -131,8 +131,8 @@ module mem(
                     mem_wdata_o  = `ZERO_WORD;
                     mem_addr_o   = mem_addr_i;
                     mem_type     = `No_mem_type;
-                    mem_write    = `WriteDisable;
-                    mem_read     = `ReadDisable;
+                    mem_rw       = 1'b0;
+                    mem_enable   = 1'b0;
                     stallreq     = `NoStall;
                 end  
             endcase
