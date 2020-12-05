@@ -8,22 +8,25 @@ module id(
     input wire [`AddrLen - 1 : 0] pc,
     input wire [`InstLen - 1 : 0] inst,
 
-    //from register.v
-    input wire [`RegLen - 1 : 0]  reg1_data_i,
-    input wire [`RegLen - 1 : 0]  reg2_data_i,
-
+    //from ex.v
     //to handle forwarding from ex
     input wire [`RegAddrLen - 1 : 0] ex_rd_addr,
     input wire ex_rd_write,
     input wire [`RegLen - 1 : 0] ex_rd_data,
 
+    //from ex.v
     //to judge last instr
     input wire [`ALU_Len - 1 : 0] ex_alu_op,
 
+    //from mem.v
     //to handle forwarding from mem
     input wire [`RegAddrLen - 1 : 0] mem_rd_addr,
     input wire mem_rd_write,
     input wire [`RegLen - 1 : 0] mem_rd_data,
+
+    //from register.v
+    input wire [`RegLen - 1 : 0]  reg1_data_i,
+    input wire [`RegLen - 1 : 0]  reg2_data_i,
 
     //to register.v
     output reg [`RegAddrLen - 1 : 0] reg1_addr_o,
@@ -46,6 +49,7 @@ module id(
     output reg jump_flag,
     output reg [`AddrLen - 1 : 0]  jump_addr,
 
+    //to ctrl.v
     output reg stallreq_for_jump,
     output reg stallreq
     );

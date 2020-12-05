@@ -6,27 +6,30 @@ module mem_ctrl(
     input clk,
     input rst,
 
-    //
-    input wire jump_signal,
-
     //from mem.v
     input wire mem_rw,
     input wire mem_enable,
-    input wire [`AddrLen - 1 : 0] mem_data_addr,
-    input wire [`InstLen - 1 : 0] mem_data_i,
+    input wire [`AddrLen - 1 : 0]  mem_data_addr,
+    input wire [`InstLen - 1 : 0]  mem_data_i,
     input wire [`memwType - 1 : 0] mem_type,
 
     //from i_cache.v
     input wire icache_needed,
     input wire [`AddrLen - 1 : 0] icache_addr,
 
+    //busy signal
+    //to i_cache.v
+    output reg mem_busy,
+    //to mem.v
+    output reg icache_busy,
+
     //to mem.v
     output reg [`InstLen - 1 : 0] mem_data_o,
-    output reg busy,
+    output reg mem_data_enable,
 
     //to i_cache.v
-    output reg inst_available_o,
-    output reg [`InstLen - 1 : 0] inst_icache,
+    output reg [`InstLen - 1 : 0] inst_o,
+    output reg inst_data_enable,
 
     //from ram.v
     input wire [7 : 0] ram_data_i,
@@ -38,7 +41,7 @@ module mem_ctrl(
 
     );
 
-    reg [2:0] cnt;
+    reg [2:0] cnt;//to remember how much bytes were read/written
 
     wire [`AddrLen - 1 : 0] addr;
     wire [2:0] num;
@@ -57,15 +60,16 @@ module mem_ctrl(
             case (mem_type)
                 `b : num = 3'b001;
                 `h : num = 3'b010;
-                `w : num = 3'b100; 
+                `w : num = 3'b100;
                 default: num = 3'b000;
             endcase
             ram_rw = (cnt == num) ? mem_rw : 1'b0;
         end
         else begin
-            addr = icache_addr;
-            ram_rw = 1'b0;
-            if(icache_needed) num = 3'b100;
+            addr   = icache_addr;
+            ram_rw = `read;
+            if(icache_needed)
+                num = 3'b100;
             else num = 3'b000;
         end
     end
@@ -74,14 +78,81 @@ module mem_ctrl(
     assign ram_data = (cnt = 3'b100) ? `ZEROWORD : s_data[cnt];
 
     always @(posedge clk) begin
-        if(rst == `ResetEnable || (jump_signal && !mem_enable)) begin
-            
+        if(rst == `ResetEnable || ( ! mem_enable)) begin
+            cnt              <= 0;
+            inst_data_enable <= 0;
+            mem_data_enable  <= 0;
+            mem_busy         <= 0;
+            icache_busy      <= 0;
+            mem_data_o       <= `ZEROWORD;
+            inst_o           <= `ZEROWORD;
+            l_data[0]        <= 8'b00000000;
+            l_data[1]        <= 8'b00000000;
+            l_data[2]        <= 8'b00000000;
+            l_data[3]        <= 8'b00000000;
+        end
+        else if(num != 0 && ram_rw == `read) begin
+            if(cnt == 0) begin
+                cnt              <= 1;
+                inst_data_enable <= 1'b0;
+                mem_data_enable  <= 1'b0;
+                mem_busy         <= mem_enable;
+                icache_busy      <= icache_needed;
+                mem_data_o       <= `ZEROWORD;
+                inst_o           <= `ZEROWORD;
+            end
+            else if(cnt < num) begin
+                cnt              <= cnt + 1;
+                l_data [cnt - 1] <= ram_data_i;
+            end
+            else begin
+                if(mem_enable) begin
+                    mem_data_enable <= 1'b1;
+                    case (mem_type)
+                        `b : mem_data_o <= ram_data_i;
+                        `h : mem_data_o <= {ram_data_i, l_data[0]};
+                        `w : mem_data_o <= {ram_data_i, l_data[2], l_data[1], l_data[0]};
+                        default: mem_data_o <= `ZEROWORD;
+                    endcase
+                end
+                else begin
+                    inst_data_enable <= 1'b1;
+                    inst_o <= {ram_data_i, l_data[2], l_data[1], l_data[0]};
+                end
+                cnt <= 0;
+            end
+        end
+        else if(num != 0 && ram_rw == `write) begin
+            inst_data_enable <= 1'b0;
+            inst_o <= `ZEROWORD;
+            if(cnt + 1 == num) begin
+                cnt             <= 0;
+                mem_data_enable <= 1'b1;
+            end
+            else if(cnt == 0) begin
+                cnt             <= cnt + 1；
+                icache_busy     <= 1'b0;
+                mem_busy        <= 1'b1;
+                mem_data_enable <= 1'b0;
+                mem_data_o      <= `ZEROWORD;
+            end
+            else begin
+                cnt <= cnt + 1;
+            end
         end
         else begin
-            
+            cnt              <= 0;
+            inst_data_enable <= 0;
+            mem_data_enable  <= 0;
+            mem_busy         <= 0;
+            icache_busy      <= 0;
+            mem_data_o       <= `ZEROWORD;
+            inst_o           <= `ZEROWORD;
+            l_data[0]        <= 8'b00000000;
+            l_data[1]        <= 8'b00000000;
+            l_data[2]        <= 8'b00000000;
+            l_data[3]        <= 8'b00000000;
         end
     end
 
-
-    
 endmodule

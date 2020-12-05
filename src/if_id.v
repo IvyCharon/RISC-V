@@ -5,6 +5,7 @@ module if_id(
     input wire clk, 
     input wire rst,
 
+    //from ctrl.v
     input wire [5 : 0] stall,
 
     //from pc_reg.v

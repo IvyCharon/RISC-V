@@ -16,10 +16,7 @@ module if (
     input wire [`InstLen - 1 : 0] inst,
 
     //to i_cache.v
-    output reg [`AddrLen - 1 : 0] addr,
-
-    //to ctrl.v
-    output reg if_stall
+    output reg [`AddrLen - 1 : 0] addr
 
     );
 
@@ -28,18 +25,18 @@ module if (
 
     always @(*) begin
         if(rst) begin
-            inst_o = `ZERO_WORD;
-            pc_o = `ZERO_WORD;
+            inst_o   = `ZERO_WORD;
+            pc_o     = `ZERO_WORD;
             if_stall = 1'b0;
         end
         else if(inst_available) begin
-            inst_o = inst;
-            pc_o = pc_i;
+            inst_o   = inst;
+            pc_o     = pc_i;
             if_stall = 1'b0;
         end
         else begin
-            inst_o = `ZERO_WORD;
-            pc_o = `ZERO_WORD;
+            inst_o   = `ZERO_WORD;
+            pc_o     = `ZERO_WORD;
             if_stall = 1'b1;
         end
     end

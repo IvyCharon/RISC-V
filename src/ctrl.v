@@ -5,12 +5,15 @@
 module ctrl (
     input wire rst,
 
+    //from id.v
     input wire stallreq_id,
+    input wire stallreq_for_jump,
+    //from i_cahce.v
     input wire stallreq_if,
+    //from mem.v
     input wire stallreq_mem,
 
-    input wire stallreq_for_jump,
-
+    //to if_id.v, id_ex.v, ex_mem.v, mem_wb.v
     output reg [5 : 0] stall
     );
 

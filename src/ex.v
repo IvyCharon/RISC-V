@@ -16,12 +16,14 @@ module ex(
     input wire [`AddrLen - 1 ：0]    addr_for_rd,
 
     //to ex_mem.v
+    output reg [`AddrLen - 1 : 0]  mem_addr_o,
+    output reg [`InstLen - 1 : 0]  mem_wdata_o,
+    //also to id.v for forwarding
     output reg [`RegLen - 1 : 0]     rd_data_o,
     output reg [`RegAddrLen - 1 : 0] rd_addr,
     output reg rd_enable_o,
-    output reg [`AddrLen - 1 : 0]  mem_addr_o,
-    output reg [`ALU_Len - 1 : 0]  alu_op_o,
-    output reg [`InstLen - 1 : 0]  mem_wdata_o
+    output reg [`ALU_Len - 1 : 0]  alu_op_o
+    
     );
 
     reg [`RegLen - 1 : 0] res;

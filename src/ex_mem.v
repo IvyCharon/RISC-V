@@ -12,8 +12,8 @@ module ex_mem(
     input wire [`RegAddrLen - 1 : 0] ex_rd_addr,
     input wire ex_rd_enable,
     input wire [`AddrLen - 1 : 0]    ex_mem_addr,
-    input wire  [`ALU_Len - 1 : 0]    ex_alu_op,
-    input wire  [`InstLen - 1 : 0]    ex_mem_wdata,
+    input wire  [`ALU_Len - 1 : 0]   ex_alu_op,
+    input wire  [`InstLen - 1 : 0]   ex_mem_wdata,
 
     //to mem.v
     output reg [`RegLen - 1 : 0]     mem_rd_data,

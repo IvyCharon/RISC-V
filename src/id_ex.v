@@ -5,6 +5,7 @@ module id_ex(
     input wire clk,
     input wire rst,
 
+    //from ctrl.v
     input wire [5 : 0] stall,
 
     //from id.v

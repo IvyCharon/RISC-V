@@ -5,6 +5,7 @@ module pc_reg(
     input wire clk,
     input wire rst,
 
+    //from ctrl.v
     input wire [5 : 0] stall,
 
     //from id.v
@@ -12,10 +13,7 @@ module pc_reg(
     input wire [`AddrLen - 1 : 0]  jump_addr,
 
     //to if.v
-    output reg [`AddrLen - 1 : 0]  pc,
-
-    //to what?
-    output reg chip_enable
+    output reg [`AddrLen - 1 : 0]  pc
     );
 
     always @ (posedge clk) begin

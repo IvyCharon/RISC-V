@@ -154,3 +154,7 @@
 //about read and write
 `define read  1'b0
 `define write 1'b1
+
+//busy signal
+`define NotBusy 1'b0
+`define Busy    1'b1

@@ -5,6 +5,7 @@ module mem_wb(
     input clk,
     input rst,
 
+    //from ctrl.v
     input wire [5 : 0] stall,
 
     //from mem.v
