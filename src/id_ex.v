@@ -28,7 +28,7 @@ module id_ex(
     output reg [`ALU_Len - 1 : 0]    ex_alu_op,
     output reg [`Jump_Len - 1 : 0]   ex_jump_op,
     output reg [`Branch_Len - 1 : 0] ex_branch_op,
-    output reg [`AddrLen - 1 ：0]    ex_addr_for_rd,
+    output reg [`AddrLen - 1 ：0]    ex_addr_for_rd
     );
 
     always @ (posedge clk) begin

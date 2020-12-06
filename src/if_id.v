@@ -8,7 +8,7 @@ module if_id(
     //from ctrl.v
     input wire [5 : 0] stall,
 
-    //from pc_reg.v
+    //from if.v
     input wire [`AddrLen - 1 : 0]  if_pc,
     input wire [`InstLen - 1 : 0]  if_inst,
 
