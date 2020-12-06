@@ -101,7 +101,7 @@ module mem(
                 mem_wdata_o <= `ZERO_WORD;
                 mem_type    <= `No_mem_type;
                 rd_enable_o <= 1'b0;
-                rd_addr_o   <= `Zero_Reg;
+                rd_addr_o   <= `ZeroReg;
                 rd_data_o   <= `ZERO_WORD;
                 stallreq    <= `NoStall;
             end
@@ -128,7 +128,7 @@ module mem(
                     end
                 endcase
                 rd_enable_o <= 1'b0;
-                rd_addr_o   <= `Zero_Reg;
+                rd_addr_o   <= `ZeroReg;
                 rd_data_o   <= `ZERO_WORD;
                 stallreq    <= `Stall;
             end

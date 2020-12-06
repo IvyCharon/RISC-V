@@ -13,7 +13,7 @@ module ex(
     input wire [`ALU_Len - 1 : 0]    alu_op,
     input wire [`Jump_Len - 1 : 0]   jump_op,
     input wire [`Branch_Len - 1 : 0] branch_op,
-    input wire [`AddrLen - 1 ：0]    addr_for_rd,
+    input wire [`AddrLen - 1 : 0]    addr_for_rd,
 
     //to ex_mem.v
     output reg [`AddrLen - 1 : 0]  mem_addr_o,
@@ -48,7 +48,7 @@ module ex(
                 `AND,`ANDI   : res = reg1 & reg2;
                 `SRL,`SRLI   : res = reg1 >> reg2[4:0];
                 `SRA,`SRAI   : res = $signed(reg1) >> reg2[4:0];
-                `SLTU,`SLTIU : res = reg1 < reg2 ? 32'b1 : 32'b0;
+                `SLTU,`SLTIU : res = reg1 < reg2 ? 1 : 0;
                 
                 //具体取位数操作在MEM进行
                 `LB          : res = reg1 + reg2;

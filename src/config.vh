@@ -8,6 +8,7 @@
 `define RegAddrLen  5 
 `define RegLen      32
 `define RegNum      32
+`define OpLen       7
 
 `define ResetEnable   1'b1
 `define ResetDisable  1'b0
@@ -107,6 +108,7 @@
 `define SUB     18
 `define SLL     19
 `define SLT     20
+`define SLTU    31
 `define XOR     21
 `define SRL     22
 `define SRA     23
@@ -158,3 +160,7 @@
 //busy signal
 `define NotBusy 1'b0
 `define Busy    1'b1
+
+//for stall
+`define Stall   1'b1
+`define NoStall 1'b0

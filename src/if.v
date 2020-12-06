@@ -1,6 +1,6 @@
 `include "config.vh"
 
-module if (
+module If (
     input clk,
     input rst,
 

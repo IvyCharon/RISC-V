@@ -165,7 +165,7 @@ module cpu(
 		.pc(pc)
 	);
 
-	if if0 (
+	If if0 (
 		.clk(clk_in),
 		.rst(rst),
 

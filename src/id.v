@@ -43,7 +43,7 @@ module id(
     output reg [`ALU_Len - 1 : 0]    alu_op,
     output reg [`Jump_Len - 1 : 0]   jump_op,
     output reg [`Branch_Len - 1 : 0] branch_op,
-    output reg [`AddrLen - 1 ：0]    addr_for_rd,
+    output reg [`AddrLen - 1 : 0]    addr_for_rd,
 
     //to pc_reg.v
     output reg jump_flag,

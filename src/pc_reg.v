@@ -16,18 +16,20 @@ module pc_reg(
     output reg [`AddrLen - 1 : 0]  pc
     );
 
+/*
     always @ (posedge clk) begin
         if (rst == `ResetEnable)
             chip_enable <= `ChipDisable;
         else
             chip_enable <= `ChipEnable;
     end
+*/
 
     always @ (posedge clk) begin
-        if (chip_enable == `ChipDisable) begin
+        /*if (chip_enable == `ChipDisable) begin
             pc <= `ZERO_WORD;
         end
-        else if (!stall[0] && JumpFlag = `BranchEnable) begin
+        else */if (!stall[0] && JumpFlag == `BranchEnable) begin
             pc <= jump_addr;
         end
         else if(!stall[0]) begin
