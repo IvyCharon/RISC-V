@@ -82,10 +82,10 @@ module i_cache (
     integer i;
     always @(posedge clk) begin
         if(rst == `ResetEnable) begin
-            for(i = 0; i < i_cache_line; i = i + 1) begin
+            for(i = 0; i < `i_cache_line; i = i + 1) begin
                 valid[i]  <= 0;
                 tag[i]    <= 0;
-                icahce[i] <= 0;
+                icache[i] <= 0;
             end
         end
         else if(inst_enable_i) begin

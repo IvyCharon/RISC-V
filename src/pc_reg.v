@@ -26,10 +26,10 @@ module pc_reg(
 */
 
     always @ (posedge clk) begin
-        /*if (chip_enable == `ChipDisable) begin
+        if (rst == `ResetEnable) begin
             pc <= `ZERO_WORD;
         end
-        else */if (!stall[0] && JumpFlag == `BranchEnable) begin
+        else if (!stall[0] && JumpFlag == `BranchEnable) begin
             pc <= jump_addr;
         end
         else if(!stall[0]) begin

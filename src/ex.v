@@ -27,46 +27,46 @@ module ex(
     );
 
     reg [`RegLen - 1 : 0] res;
-    assign alu_op_o = alu_op;
-    assign mem_wdata_o = reg2;
 
     //Do the calculation
     always @ (*) begin
+        alu_op_o    <= alu_op;
+        mem_wdata_o <= reg2;
         if (rst == `ResetEnable) begin
-            res = `ZERO_WORD;
+            res <= `ZERO_WORD;
         end
         else begin
             case (alu_op)
-                `LUI         : res = reg2;
-                `AUIPC       : res = reg1 + reg2;
-                `ADD,`ADDI   : res = reg1 + reg2;
-                `SUB         : res = reg1 - reg2;
-                `SLL,`SLLI   : res = reg1 << reg2[4:0];
-                `SLT,`SLTI   : res = $signed(reg1) < $signed(reg2) ? 32'b1 : 32'b0;
-                `XOR,`XORI   : res = reg1 ^ reg2;
-                `OR,`ORI     : res = reg1 | reg2;
-                `AND,`ANDI   : res = reg1 & reg2;
-                `SRL,`SRLI   : res = reg1 >> reg2[4:0];
-                `SRA,`SRAI   : res = $signed(reg1) >> reg2[4:0];
-                `SLTU,`SLTIU : res = reg1 < reg2 ? 1 : 0;
+                `LUI         : res <= reg2;
+                `AUIPC       : res <= reg1 + reg2;
+                `ADD,`ADDI   : res <= reg1 + reg2;
+                `SUB         : res <= reg1 - reg2;
+                `SLL,`SLLI   : res <= reg1 << reg2[4:0];
+                `SLT,`SLTI   : res <= $signed(reg1) < $signed(reg2) ? 32'b1 : 32'b0;
+                `XOR,`XORI   : res <= reg1 ^ reg2;
+                `OR,`ORI     : res <= reg1 | reg2;
+                `AND,`ANDI   : res <= reg1 & reg2;
+                `SRL,`SRLI   : res <= reg1 >> reg2[4:0];
+                `SRA,`SRAI   : res <= $signed(reg1) >> reg2[4:0];
+                `SLTU,`SLTIU : res <= reg1 < reg2 ? 1 : 0;
                 
                 //具体取位数操作在MEM进行
-                `LB          : res = reg1 + reg2;
-                `LH          : res = reg1 + reg2;
-                `LW          : res = reg1 + reg2;
-                `LBU         : res = reg1 + reg2;
-                `LHU         : res = reg1 + reg2;
+                `LB          : res <= reg1 + reg2;
+                `LH          : res <= reg1 + reg2;
+                `LW          : res <= reg1 + reg2;
+                `LBU         : res <= reg1 + reg2;
+                `LHU         : res <= reg1 + reg2;
 
-                `SB          : res = reg1 + reg2;
-                `SH          : res = reg1 + reg2;
-                `SW          : res = reg1 + reg2;
+                `SB          : res <= reg1 + reg2;
+                `SH          : res <= reg1 + reg2;
+                `SW          : res <= reg1 + reg2;
 
-                `JUMP        : res = addr_for_rd;
+                `JUMP        : res <= addr_for_rd;
 
-                `BRANCH      : res = `ZERO_WORD;
+                `BRANCH      : res <= `ZERO_WORD;
 
                 default:
-                    res = `ZERO_WORD;
+                    res <= `ZERO_WORD;
             endcase
         end
     end
@@ -74,28 +74,28 @@ module ex(
     //Determine the output
     always @ (*) begin
         if (rst == `ResetEnable) begin
-            rd_enable_o = `WriteDisable;
-            rd_addr     = `ZERO_WORD;
-            rd_data_o   = `ZERO_WORD;
-            mem_addr_o  = `ZERO_WORD;
-            mem_wdata_o = `ZERO_WORD;
-            alu_op_o    = `NoAlu;
+            rd_enable_o <= `WriteDisable;
+            rd_addr     <= `ZERO_WORD;
+            rd_data_o   <= `ZERO_WORD;
+            mem_addr_o  <= `ZERO_WORD;
+            mem_wdata_o <= `ZERO_WORD;
+            alu_op_o    <= `NoAlu;
         end
         else begin 
-            rd_addr = rd;
-            rd_enable_o = rd_enable;
+            rd_addr <= rd;
+            rd_enable_o <= rd_enable;
             case (alu_op)
                 `BRANCH: begin
-                    rd_data_o  = `ZERO_WORD;
-                    mem_addr_o = `ZERO_WORD;
+                    rd_data_o  <= `ZERO_WORD;
+                    mem_addr_o <= `ZERO_WORD;
                 end
                 `LB,`LH,`LW,`LBU,`LHU,`SB,`SH,`SW: begin
-                    mem_addr_o = res;
-                    rd_data_o  = `ZERO_WORD;
+                    mem_addr_o <= res;
+                    rd_data_o  <= `ZERO_WORD;
                 end
                 default: begin
-                    rd_data_o  = res;
-                    mem_addr_o = `ZERO_WORD;
+                    rd_data_o  <= res;
+                    mem_addr_o <= `ZERO_WORD;
                 end
             endcase
         end

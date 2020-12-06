@@ -20,24 +20,20 @@ module If (
 
     );
 
-    assign addr = pc_i;
-    assign pc_o = pc_i;
-
     always @(*) begin
+        addr = pc_i;
+        pc_o = pc_i;
         if(rst) begin
             inst_o   = `ZERO_WORD;
             pc_o     = `ZERO_WORD;
-            if_stall = 1'b0;
         end
         else if(inst_available) begin
             inst_o   = inst;
             pc_o     = pc_i;
-            if_stall = 1'b0;
         end
         else begin
             inst_o   = `ZERO_WORD;
             pc_o     = `ZERO_WORD;
-            if_stall = 1'b1;
         end
     end
     

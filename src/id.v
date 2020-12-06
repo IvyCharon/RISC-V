@@ -56,11 +56,6 @@ module id(
 
     wire [`OpLen - 1 : 0] opcode = inst[`OpLen - 1 : 0];
     reg useImmInstead;
-    reg [`RegLen - 1 : 0] imm_branch = { {20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 0 };
-
-    reg stall_reg1, stall_reg2;
-
-    assign stallreq = stall_reg1 | stall_reg2;
     
     //Decode: Get opcode, imm, rd, and the addr of rs1&rs2
     always @ (*) begin
@@ -74,13 +69,13 @@ module id(
         end
     end
 
-    reg [funct3Len - 1 : 0] funct3;
-    reg [funct7Len - 1 : 0] funct7; 
+    reg [`funct3Len - 1 : 0] funct3;
+    reg [`funct7Len - 1 : 0] funct7; 
 
-    wire pre_inst;
-    assign pre_inst = (ex_alu_op == LW || ex_alu_op == LB || ex_alu_op == LH || ex_alu_op == LBU || ex_alu_op == LHU) ? 1 : 0;
+    reg pre_inst;
 
     always @(*) begin
+        pre_inst         = (ex_alu_op == `LW || ex_alu_op == `LB || ex_alu_op == `LH || ex_alu_op == `LBU || ex_alu_op == `LHU) ? 1 : 0;
         reg1_addr_o      = `ZERO_WORD;
         reg1_read_enable = `ReadDisable;
         reg2_addr_o      = `ZERO_WORD;
@@ -234,7 +229,7 @@ module id(
                 jump_op = `NoJump;
 
                 addr_for_rd = `ZERO_WORD;
-                jump_addr   = pc + imm_branch;
+                jump_addr   = pc + { {20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 0 };
 
                 case (funct3)
                     `op_BEQ: begin
@@ -373,12 +368,12 @@ module id(
 
     //Get rs1
     always @ (*) begin
-        stall_reg1 = 1'b0;
+        stallreq = 1'b0;
         if (rst == `ResetEnable) begin
             reg1 = `ZERO_WORD;
         end
         else if(pre_inst && ex_rd_addr == reg1_addr_o && ex_rd_write) begin
-            stall_reg1 = 1'b1;
+            stallreq = 1'b1;
         end
         else if(alu_op == `AUIPC) begin
             reg1 = pc;
@@ -399,12 +394,12 @@ module id(
 
     //Get rs2
     always @ (*) begin
-        stall_reg2 = 1'b0;
+        stallreq = 1'b0;
         if (rst == `ResetEnable) begin
             reg2 = `ZERO_WORD;
         end
         else if(pre_inst && ex_rd_addr == reg2_addr_o && ex_rd_write) begin
-            stall_reg2 = 1'b1;
+            stallreq = 1'b1;
         end
         else if(reg2_read_enable == `ReadEnable && reg2_addr_o == ex_rd_addr && ex_rd_write == `WriteEnable && reg2_addr_o != `ZeroReg) begin
             reg2 = ex_rd_data;

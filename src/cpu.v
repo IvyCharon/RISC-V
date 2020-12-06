@@ -280,7 +280,7 @@ module cpu(
 		.mem_wdata_o(mem_wdata_eem),
 		.rd_data_o(ex_rd_data),
 		.rd_addr(ex_rd_addr),
-		.rd_enable_o(ex_rd_enable),
+		.rd_enable_o(ex_rd_write),
 		.alu_op_o(ex_alu_op)
 	);
 
@@ -292,7 +292,7 @@ module cpu(
 
 		.ex_rd_data(ex_rd_data),
 		.ex_rd_addr(ex_rd_addr),
-		.ex_rd_enable(ex_rd_enable),
+		.ex_rd_enable(ex_rd_write),
 		.ex_mem_addr(mem_addr_eem),
 		.ex_alu_op(ex_alu_op),
 		.ex_mem_wdata(mem_wdata_eem),
@@ -302,7 +302,7 @@ module cpu(
 		.mem_mem_addr(mem_addr_emm),
 		.mem_alu_op(alu_op_emm),
 		.mem_mem_wdata(mem_wdata_emm),
-		.mem_rd_enable(rd_enable_emm),
+		.mem_rd_enable(rd_enable_emm)
 
 	);
 
@@ -401,7 +401,7 @@ module cpu(
 		.icache_addr(inst_addr_im),
 
 		.mem_busy(mem_busy),
-		.icahce_busy(icache_busy),
+		.icache_busy(icache_busy),
 
 		.mem_data_o(data_mc_m),
 		.mem_data_enable(data_enable_mc_m),
