@@ -298,7 +298,7 @@ module cpu(
 		.ex_mem_wdata(mem_wdata_eem),
 
 		.mem_rd_data(rd_data_emm),
-		.mem_rd_addr(rd_data_emm),
+		.mem_rd_addr(rd_addr_emm),
 		.mem_mem_addr(mem_addr_emm),
 		.mem_alu_op(alu_op_emm),
 		.mem_mem_wdata(mem_wdata_emm),

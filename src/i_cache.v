@@ -40,19 +40,19 @@ module i_cache (
 
     always @(*) begin
         if(rst == `ResetEnable) begin
-            inst_available_o = 1'b0;
-            inst             = `ZERO_WORD;
-            stallreq         = `NoStall;
+            inst_available_o <= 1'b0;
+            inst             <= `ZERO_WORD;
+            stallreq         <= `NoStall;
         end
         else if(hit) begin
-            inst_available_o = 1'b1;
-            inst             = icache[addr_index];
-            stallreq         = `NoStall;
+            inst_available_o <= 1'b1;
+            inst             <= icache[addr_index];
+            stallreq         <= `NoStall;
         end
         else begin
-            inst_available_o = 1'b0;
-            inst             = `ZERO_WORD;
-            stallreq         = `Stall;
+            inst_available_o <= 1'b0;
+            inst             <= `ZERO_WORD;
+            stallreq         <= `Stall;
         end
     end
 

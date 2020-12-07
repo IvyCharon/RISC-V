@@ -63,7 +63,7 @@ module mem_ctrl(
     assign ram_data = (cnt == 3'b100) ? `ZERO_WORD : s_data[cnt];
 
     always @(posedge clk) begin
-        if(rst == `ResetEnable || ( ! mem_enable)) begin
+        if(rst == `ResetEnable) begin
             cnt              <= 0;
             inst_data_enable <= 0;
             mem_data_enable  <= 0;
@@ -82,13 +82,13 @@ module mem_ctrl(
                 inst_data_enable <= 1'b0;
                 mem_data_enable  <= 1'b0;
                 mem_busy         <= mem_enable;
-                icache_busy      <= icache_needed;
+                icache_busy      <= icache_needed && (! mem_enable);
                 mem_data_o       <= `ZERO_WORD;
                 inst_o           <= `ZERO_WORD;
             end
             else if(cnt < num) begin
                 cnt              <= cnt + 1;
-                l_data [cnt - 1] <= ram_data_i;
+                l_data[cnt - 1]  <= ram_data_i;
             end
             else begin
                 if(mem_enable) begin

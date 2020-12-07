@@ -21,19 +21,19 @@ module If (
     );
 
     always @(*) begin
-        addr = pc_i;
-        pc_o = pc_i;
+        addr <= pc_i;
+        pc_o <= pc_i;
         if(rst) begin
-            inst_o   = `ZERO_WORD;
-            pc_o     = `ZERO_WORD;
+            inst_o   <= `ZERO_WORD;
+            pc_o     <= `ZERO_WORD;
         end
         else if(inst_available) begin
-            inst_o   = inst;
-            pc_o     = pc_i;
+            inst_o   <= inst;
+            pc_o     <= pc_i;
         end
         else begin
-            inst_o   = `ZERO_WORD;
-            pc_o     = `ZERO_WORD;
+            inst_o   <= `ZERO_WORD;
+            pc_o     <= `ZERO_WORD;
         end
     end
     

@@ -19,16 +19,16 @@ module ctrl (
 
     always @ (*) begin
         if(rst == `ResetEnable)
-            stall = 6'b000000;
+            stall <= 6'b000000;
         else if(stallreq_mem == `Stall)
-            stall = 6'b011111;
+            stall <= 6'b011111;
         else if(stallreq_id == `Stall)
-            stall = 6'b000111;
+            stall <= 6'b000111;
         else if(stallreq_if == `Stall)
-            stall = 6'b000011;
+            stall <= 6'b000011;
         else if(stallreq_for_jump == `Stall)
-            stall = 6'b000010;
-        else stall = 6'b000000;
+            stall <= 6'b000010;
+        else stall <= 6'b000000;
     end
 
 endmodule

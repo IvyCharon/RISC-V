@@ -41,7 +41,7 @@ module ex_mem(
             mem_alu_op     <= `NoAlu;
             mem_mem_wdata  <= `ZERO_WORD;
         end
-        else begin
+        else if(!stall[3]) begin
             mem_rd_data    <= ex_rd_data;
             mem_rd_addr    <= ex_rd_addr;
             mem_rd_enable  <= ex_rd_enable;
