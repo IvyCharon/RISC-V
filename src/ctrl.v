@@ -27,7 +27,7 @@ module ctrl (
         else if(stallreq_if == `Stall)
             stall <= 6'b000011;
         else if(stallreq_for_jump == `Stall)
-            stall <= 6'b000010;
+            stall <= 6'b000110;
         else stall <= 6'b000000;
     end
 

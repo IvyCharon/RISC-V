@@ -8,13 +8,15 @@ module pc_reg(
     //from ctrl.v
     input wire [5 : 0] stall,
 
-    //from id.v
+    //from ex.v
     input wire JumpFlag,
     input wire [`AddrLen - 1 : 0]  jump_addr,
 
     //to if.v
     output reg [`AddrLen - 1 : 0]  pc
     );
+
+    reg [`AddrLen - 1 : 0] pc_r;
 
 /*
     always @ (posedge clk) begin
@@ -27,13 +29,16 @@ module pc_reg(
 
     always @ (posedge clk) begin
         if (rst == `ResetEnable) begin
-            pc <= `ZERO_WORD;
+            pc   <= `ZERO_WORD;
+            pc_r <= `ZERO_WORD;
         end
         else if (!stall[0] && JumpFlag == `BranchEnable) begin
-            pc <= jump_addr;
+            pc_r <= jump_addr;
+            pc   <= pc_r;
         end
         else if(!stall[0]) begin
-            pc <= pc + 4'h4;
+            pc_r <= pc_r + 4'h4;
+            pc   <= pc_r;
         end
     end
 

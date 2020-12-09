@@ -43,14 +43,9 @@ module id(
     output reg [`ALU_Len - 1 : 0]    alu_op,
     output reg [`Jump_Len - 1 : 0]   jump_op,
     output reg [`Branch_Len - 1 : 0] branch_op,
-    output reg [`AddrLen - 1 : 0]    addr_for_rd,
-
-    //to pc_reg.v
-    output reg jump_flag,
-    output reg [`AddrLen - 1 : 0]  jump_addr,
+    output reg [`AddrLen - 1 : 0]    jump_addr1,
 
     //to ctrl.v
-    output reg stallreq_for_jump,
     output reg stallreq
     );
 
@@ -88,10 +83,6 @@ module id(
         alu_op    <= `NoAlu;
         jump_op   <= `NoJump;
         branch_op <= `NoBranch;
-
-        jump_flag   <= `JumpDisable;
-        jump_addr   <= `ZERO_WORD;
-        addr_for_rd <= `ZERO_WORD;
 
         case (opcode)
             `op_I: begin                //I-type
@@ -156,8 +147,8 @@ module id(
                 rd_enable        <= `WriteEnable;
                 reg1_read_enable <= `ReadEnable;
                 reg2_read_enable <= `ReadDisable;
-                Imm              <= `ZERO_WORD;
-                useImmInstead    <= `ImmNotUsed;
+                Imm              <= { {20{1'b0}} ,inst[31:20] };
+                useImmInstead    <= `ImmUsed;
 
                 funct3 <= inst[14:12];
                 funct7 <= inst[31:25];
@@ -166,12 +157,6 @@ module id(
 
                 jump_op   <= `JALR;
                 branch_op <= `NoBranch;
-
-                addr_for_rd <= pc + `AddrLen'h4;
-                jump_flag   <= `JumpEnable;
-                jump_addr   <= reg1 + { {20{0}} ,inst[31:20] };
-
-                stallreq_for_jump <= 1'b1;
                 
             end
             `op_R: begin                //R-type
@@ -218,53 +203,25 @@ module id(
                 rd               <= `ZeroReg;
                 reg1_read_enable <= `ReadEnable;
                 reg2_read_enable <= `ReadEnable;
-                Imm              <= `ZERO_WORD;
-                useImmInstead    <= `ImmNotUsed;
+                Imm              <= { {20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 1'b0 };
+                useImmInstead    <= `ImmUsed;
 
                 funct3 <= inst[14:12];
                 funct7 <= `funct7Zero;
 
                 alu_op <= `BRANCH;
 
-                jump_op <= `NoJump;
-
-                addr_for_rd <= `ZERO_WORD;
-                jump_addr   <= pc + { {20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 0 };
+                jump_addr1 <= pc;
 
                 case (funct3)
-                    `op_BEQ: begin
-                        branch_op <= `BEQ;
-                        jump_flag <= (reg1 == reg2) ? `JumpEnable : `JumpDisable;
-                        stallreq_for_jump <= (reg1 == reg2) ? 1'b1 : 1'b0;
-                    end
-                    `op_BNE: begin
-                        branch_op <= `BNE;
-                        jump_flag <= (reg1 != reg2) ? `JumpEnable : `JumpDisable;
-                        stallreq_for_jump <= (reg1 != reg2) ? 1'b1 : 1'b0;
-                    end
-                    `op_BLT: begin
-                        branch_op <= `BLT;
-                        jump_flag <= ($signed(reg1) < $signed(reg2)) ? `JumpEnable : `JumpDisable;
-                        stallreq_for_jump <= ($signed(reg1) < $signed(reg2)) ? 1'b1 : 1'b0;
-                    end
-                    `op_BGE: begin
-                        branch_op <= `BGE;
-                        jump_flag <= ($signed(reg1) >= $signed(reg2)) ? `JumpEnable : `JumpDisable;
-                        stallreq_for_jump <= ($signed(reg1) >= $signed(reg2)) ? 1'b1 : 1'b0;
-                    end
-                    `op_BLTU: begin
-                        branch_op <= `BLTU;
-                        jump_flag <= (reg1 < reg2) ? `JumpEnable : `JumpDisable;
-                        stallreq_for_jump <= (reg1 < reg2) ? 1'b1 : 1'b0;
-                    end
-                    `op_BGEU: begin
-                        branch_op <= `BGEU;
-                        jump_flag <= (reg1 >= reg2) ? `JumpEnable : `JumpDisable;
-                        stallreq_for_jump <= (reg1 >= reg2) ? 1'b1 : 1'b0;
-                    end
+                    `op_BEQ:  branch_op <= `BEQ;
+                    `op_BNE:  branch_op <= `BNE;
+                    `op_BLT:  branch_op <= `BLT;
+                    `op_BGE:  branch_op <= `BGE;
+                    `op_BLTU: branch_op <= `BLTU;
+                    `op_BGEU: branch_op <= `BGEU;
                     default: begin
                         branch_op <= `NoBranch;
-                        jump_flag <= `JumpDisable;
                     end
                 endcase
                 
@@ -296,7 +253,7 @@ module id(
                 rd               <= inst[11 : 7];
                 reg1_read_enable <= `ReadDisable;
                 reg2_read_enable <= `ReadDisable;
-                Imm              <= { inst[31:12], {12{0}}};
+                Imm              <= { inst[31:12], {12{1'b0}}};
                 useImmInstead    <= `ImmUsed;
 
                 alu_op <= `LUI;
@@ -313,7 +270,7 @@ module id(
                 rd               <= inst[11 : 7];
                 reg1_read_enable <= `ReadDisable;
                 reg2_read_enable <= `ReadDisable;
-                Imm              <= { inst[31:12], {12{0}}};
+                Imm              <= { inst[31:12], {12{1'b0}}};
                 useImmInstead    <= `ImmUsed;
 
                 alu_op <= `AUIPC;
@@ -330,8 +287,8 @@ module id(
                 rd               <= inst[11:7];
                 reg1_read_enable <= `ReadDisable;
                 reg2_read_enable <= `ReadDisable;
-                Imm              <= `ZERO_WORD;
-                useImmInstead    <= `ImmNotUsed;
+                Imm              <= { {12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0};
+                useImmInstead    <= `ImmUsed;
 
                 alu_op <= `JUMP;
 
@@ -341,11 +298,7 @@ module id(
                 funct3 <= `funct3Zero;
                 funct7 <= `funct7Zero;
 
-                addr_for_rd <= pc + `AddrLen'h4;
-                jump_flag   <= `JumpEnable;
-                jump_addr   <= pc + { {12{inst[31]}}, inst[19:12], inst[20], inst[30:21], 0};
-
-                stallreq_for_jump <= 1'b1;
+                jump_addr1 <= pc;
                 
             end
             default: begin
@@ -375,20 +328,38 @@ module id(
         else if(pre_inst && ex_rd_addr == reg1_addr_o && ex_rd_write) begin
             stallreq <= 1'b1;
         end
-        else if(alu_op == `AUIPC) begin
+        else if(alu_op == `AUIPC || (alu_op == `JUMP && jump_op == `JAL)) begin
             reg1 <= pc;
         end
         else if(reg1_read_enable == `ReadEnable && reg1_addr_o == ex_rd_addr && ex_rd_write == `WriteEnable && reg1_addr_o != `ZeroReg) begin
-            reg1 <= ex_rd_data;
+            if(alu_op == `JUMP && jump_op == `JALR) begin
+                jump_addr1 <= ex_rd_data;
+                reg1 <= pc;
+            end
+            else begin
+                reg1 <= ex_rd_data;
+            end
         end
         else if(reg1_read_enable == `ReadEnable && reg1_addr_o == mem_rd_addr && mem_rd_write == `WriteEnable && reg1_addr_o != `ZeroReg) begin
-            reg1 <= mem_rd_data;
+            if(alu_op == `JUMP && jump_op == `JALR) begin
+                jump_addr1 <= mem_rd_data;
+                reg1 <= pc;
+            end
+            else begin
+               reg1 <= mem_rd_data; 
+            end
         end
         else if (reg1_read_enable == `ReadDisable) begin
             reg1 <= `ZERO_WORD;
         end
         else begin
-            reg1 <= reg1_data_i;
+            if(alu_op == `JUMP && jump_op == `JALR) begin
+                jump_addr1 <= reg1_data_i;
+                reg1 <= pc;
+            end
+            else begin
+               reg1 <= reg1_data_i; 
+            end
         end
     end
 

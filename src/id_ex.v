@@ -17,7 +17,7 @@ module id_ex(
     input wire [`ALU_Len - 1 : 0]    id_alu_op,
     input wire [`Jump_Len - 1 : 0]   id_jump_op,
     input wire [`Branch_Len - 1 : 0] id_branch_op,
-    input wire [`AddrLen - 1 : 0]    id_addr_for_rd,
+    input wire [`AddrLen - 1 : 0]    id_jump_addr1,
 
     //to ex.v
     output reg [`RegLen - 1 : 0] ex_reg1,
@@ -28,7 +28,7 @@ module id_ex(
     output reg [`ALU_Len - 1 : 0]    ex_alu_op,
     output reg [`Jump_Len - 1 : 0]   ex_jump_op,
     output reg [`Branch_Len - 1 : 0] ex_branch_op,
-    output reg [`AddrLen - 1 : 0]    ex_addr_for_rd
+    output reg [`AddrLen - 1 : 0]    ex_jump_addr1
     );
 
     always @ (posedge clk) begin
@@ -41,7 +41,7 @@ module id_ex(
             ex_alu_op      <= `NoAlu;
             ex_jump_op     <= `NoJump;
             ex_branch_op   <= `NoBranch;
-            ex_addr_for_rd <= `ZERO_WORD;
+            ex_jump_addr1 <= `ZERO_WORD;
         end
         else if (stall[2] && !stall[3]) begin
             ex_reg1        <= `ZERO_WORD;
@@ -52,9 +52,9 @@ module id_ex(
             ex_alu_op      <= `NoAlu;
             ex_jump_op     <= `NoJump;
             ex_branch_op   <= `NoBranch;
-            ex_addr_for_rd <= `ZERO_WORD;
+            ex_jump_addr1 <= `ZERO_WORD;
         end
-        else begin
+        else if(!stall[2]) begin
             ex_reg1        <= id_reg1;
             ex_reg2        <= id_reg2;
             ex_Imm         <= id_Imm;
@@ -63,7 +63,7 @@ module id_ex(
             ex_alu_op      <= id_alu_op;
             ex_jump_op     <= id_jump_op;
             ex_branch_op   <= id_branch_op;
-            ex_addr_for_rd <= id_addr_for_rd;
+            ex_jump_addr1  <= id_jump_addr1;
         end
     end
 

@@ -63,7 +63,7 @@ module cpu(
 	wire [`ALU_Len - 1 : 0] alu_op_de;
 	wire [`Jump_Len - 1 : 0] jump_op_de;
 	wire [`Branch_Len - 1 : 0] branch_op_de;
-	wire [`AddrLen - 1 : 0] addr_for_rd_de;
+	wire [`AddrLen - 1 : 0] jump_addr1_de;
 
 	//id_ex -> ex
 	wire [`RegLen - 1 : 0] reg1_dee;
@@ -74,7 +74,7 @@ module cpu(
 	wire [`ALU_Len - 1 : 0] alu_op_dee;
 	wire [`Jump_Len - 1 : 0] jump_op_dee;
 	wire [`Branch_Len - 1 : 0] branch_op_dee;
-	wire [`AddrLen - 1 : 0] addr_for_rd_dee;
+	wire [`AddrLen - 1 : 0] jump_addr1_dee;
 
 	//ex -> id/ex_mem
 	wire [`RegAddrLen - 1 : 0] ex_rd_addr;
@@ -140,7 +140,7 @@ module cpu(
 	//mem_ctrl -> mem
 	wire [`InstLen - 1 : 0] data_mc_m;
 	wire data_enable_mc_m;
-	wire icahce_busy;
+	wire icache_busy;
 
 	ctrl ctrl0 (
 		.rst(rst),
@@ -226,12 +226,8 @@ module cpu(
 		.alu_op(alu_op_de),
 		.jump_op(jump_op_de),
 		.branch_op(branch_op_de),
-		.addr_for_rd(addr_for_rd_de),
+		.jump_addr1(jump_addr1_de),
 
-		.jump_flag(jump_flag_dp),
-		.jump_addr(jump_addr_dp),
-
-		.stallreq_for_jump(stallreq_for_jump),
 		.stallreq(stallreq_id)
 
 	);
@@ -250,7 +246,7 @@ module cpu(
 		.id_alu_op(alu_op_de),
 		.id_jump_op(jump_op_de),
 		.id_branch_op(branch_op_de),
-		.id_addr_for_rd(addr_for_rd_de),
+		.id_jump_addr1(jump_addr1_de),
 
 		.ex_reg1(reg1_dee),
 		.ex_reg2(reg2_dee),
@@ -260,7 +256,7 @@ module cpu(
 		.ex_alu_op(alu_op_dee),
 		.ex_jump_op(jump_op_dee),
 		.ex_branch_op(branch_op_dee),
-		.ex_addr_for_rd(addr_for_rd_dee)
+		.ex_jump_addr1(jump_addr1_dee)
 	);
 
 	ex ex0 (
@@ -274,14 +270,19 @@ module cpu(
 		.alu_op(alu_op_dee),
 		.jump_op(jump_op_dee),
 		.branch_op(branch_op_dee),
-		.addr_for_rd(addr_for_rd_dee),
+		.jump_addr1(jump_addr1_dee),
 
 		.mem_addr_o(mem_addr_eem),
 		.mem_wdata_o(mem_wdata_eem),
 		.rd_data_o(ex_rd_data),
 		.rd_addr(ex_rd_addr),
 		.rd_enable_o(ex_rd_write),
-		.alu_op_o(ex_alu_op)
+		.alu_op_o(ex_alu_op),
+
+		.jump_flag(JumpFlag),
+		.jump_addr(jump_addr),
+
+		.stallreq_jump(stallreq_for_jump)
 	);
 
 	ex_mem ex_mem0 (
