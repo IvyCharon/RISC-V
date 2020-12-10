@@ -43,6 +43,8 @@ module ex(
             res <= `ZERO_WORD;
         end
         else begin
+            jump_flag <= 1'b0;
+            jump_addr <= `ZERO_WORD;
             case (alu_op)
                 `LUI         : res <= reg2;
                 `AUIPC       : res <= reg1 + reg2;

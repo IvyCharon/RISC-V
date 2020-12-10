@@ -32,12 +32,12 @@ module pc_reg(
             pc   <= `ZERO_WORD;
             pc_r <= `ZERO_WORD;
         end
-        else if (!stall[0] && JumpFlag == `BranchEnable) begin
-            pc_r <= jump_addr;
-            pc   <= pc_r;
+        else if (JumpFlag == `BranchEnable) begin
+            pc_r <= jump_addr + 4;
+            pc   <= jump_addr;
         end
         else if(!stall[0]) begin
-            pc_r <= pc_r + 4'h4;
+            pc_r <= pc_r + 4;
             pc   <= pc_r;
         end
     end
