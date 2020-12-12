@@ -26,7 +26,7 @@ module if_id(
             id_pc   <= `ZERO_WORD;
             id_inst <= `ZERO_WORD;
         end
-        else begin
+        else if(!stall[1]) begin
             id_pc   <= if_pc;
             id_inst <= if_inst;
         end

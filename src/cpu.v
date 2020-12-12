@@ -142,6 +142,11 @@ module cpu(
 	wire data_enable_mc_m;
 	wire icache_busy;
 
+	//for jump_signal
+	wire ifj_pc_if;
+	wire isj_ic_mc;
+	wire ifj_if_ic;
+
 	ctrl ctrl0 (
 		.rst(rst),
 
@@ -162,7 +167,8 @@ module cpu(
 		.JumpFlag(JumpFlag),
 		.jump_addr(jump_addr),
 
-		.pc(pc)
+		.pc(pc),
+		.is_jump(ifj_pc_if)
 	);
 
 	If if0 (
@@ -170,6 +176,7 @@ module cpu(
 		.rst(rst),
 
 		.pc_i(pc),
+		.is_jump(ifj_pc_if),
 
 		.pc_o(pc_iffd),
 		.inst_o(inst_iffd),
@@ -177,7 +184,8 @@ module cpu(
 		.inst_available(inst_available_if),
 		.inst(inst_if),
 
-		.addr(addr_if)
+		.addr(addr_if),
+		.is_jump_o(ifj_if_ic)
 
 	);
 
@@ -368,11 +376,13 @@ module cpu(
 		.read_data2(reg2_data)
 	);
 
+
 	i_cache i_cache0 (
 		.clk(clk_in),
 		.rst(rst),
 
 		.inst_addr_i(addr_if),
+		.is_jump_i(ifj_if_ic),
 
 		.inst(inst_if),
 		.inst_available_o(inst_available_if),
@@ -383,6 +393,7 @@ module cpu(
 
 		.inst_needed(inst_needed),
 		.inst_addr_to_mem(inst_addr_im),
+		.is_jump_o(isj_ic_mc),
 
 		.stallreq(stallreq_if)
 
@@ -400,6 +411,7 @@ module cpu(
 
 		.icache_needed(inst_needed),
 		.icache_addr(inst_addr_im),
+		.is_jump(isj_ic_mc),
 
 		.mem_busy(mem_busy),
 		.icache_busy(icache_busy),

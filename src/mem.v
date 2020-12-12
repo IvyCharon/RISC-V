@@ -46,7 +46,7 @@ module mem(
             mem_enable   <= 1'b0;
             stallreq     <= `NoStall;
         end
-        else if (icache_busy) begin
+        else if (icache_busy && (alu_op == `LB || alu_op == `LH || alu_op == `LW || alu_op == `LBU || alu_op == `LHU || alu_op == `SB || alu_op == `SH || alu_op == `SW)) begin
             rd_data_o    <= `ZERO_WORD;
             rd_addr_o    <= `RegAddrLen'h0;
             rd_enable_o  <= `WriteDisable;
