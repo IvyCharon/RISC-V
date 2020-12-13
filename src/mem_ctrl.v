@@ -16,7 +16,6 @@ module mem_ctrl(
     //from i_cache.v
     input wire icache_needed,
     input wire [`AddrLen - 1 : 0] icache_addr,
-    input wire is_jump,
 
     //busy signal
     //to i_cache.v
@@ -43,6 +42,7 @@ module mem_ctrl(
     );
 
     reg [2:0] cnt;//to remember how much bytes were read/written
+    reg [`AddrLen - 1 : 0] raddr;
 
     wire [`AddrLen - 1 : 0] addr;
     wire [2:0] num;
@@ -63,10 +63,18 @@ module mem_ctrl(
     assign ram_addr = addr + cnt;
     assign ram_data = (cnt == 3'b100) ? `ZERO_WORD : s_data[cnt];
 
-    //assign cnt = mem_enable ? cnt : (is_jump ? 0 : cnt);
+    always @(*) begin
+        if(rst == `ResetEnable) begin
+            raddr <= `ZERO_WORD;
+        end
+        else if(raddr != addr) begin
+            cnt <= 0;
+            raddr <= addr;
+        end
+    end
 
     always @(posedge clk) begin
-        if(rst == `ResetEnable || (!mem_enable && is_jump)) begin
+        if(rst == `ResetEnable) begin
             cnt              <= 0;
             inst_data_enable <= 0;
             mem_data_enable  <= 0;

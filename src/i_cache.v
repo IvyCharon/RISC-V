@@ -7,7 +7,6 @@ module i_cache (
 
     //from if.v
     input wire [`AddrLen - 1 : 0] inst_addr_i,
-    input wire is_jump_i,
 
     //to if.v
     output reg [`InstLen - 1 : 0] inst,
@@ -21,7 +20,6 @@ module i_cache (
     //to mem_ctrl.v
     output reg inst_needed,
     output reg [`AddrLen - 1 : 0] inst_addr_to_mem,
-    output reg is_jump_o,
 
     //to ctrl.v
     output reg stallreq
@@ -62,24 +60,20 @@ module i_cache (
         if(rst == `ResetEnable) begin
             inst_needed      <= 1'b0;
             inst_addr_to_mem <= `ZERO_WORD;
-            is_jump_o        <= 1'b0;
         end
         else begin
             if(hit) begin
                 inst_needed      <= 1'b0;
                 inst_addr_to_mem <= `ZERO_WORD;
-                is_jump_o        <= 1'b0;
             end
             else begin
                 if(inst_enable_i || mem_busy) begin
                     inst_needed      <= 1'b0;
                     inst_addr_to_mem <= `ZERO_WORD;
-                    is_jump_o        <= 1'b0;
                 end
                 else begin
                     inst_needed      <= 1'b1;
-                    inst_addr_to_mem <= inst_addr_i; 
-                    is_jump_o        <= is_jump_i;
+                    inst_addr_to_mem <= inst_addr_i;
                 end
             end
         end
