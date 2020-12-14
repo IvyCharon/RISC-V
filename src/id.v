@@ -38,7 +38,7 @@ module id(
     output reg [`RegLen - 1 : 0] reg1,
     output reg [`RegLen - 1 : 0] reg2,
     output reg [`RegLen - 1 : 0] Imm,
-    output reg [`RegLen - 1 : 0] rd,
+    output reg [`RegAddrLen - 1 : 0] rd,
     output reg rd_enable,
     output reg [`ALU_Len - 1 : 0]    alu_op,
     output reg [`Jump_Len - 1 : 0]   jump_op,
@@ -71,9 +71,7 @@ module id(
 
     always @(*) begin
         pre_inst         <= (ex_alu_op == `LW || ex_alu_op == `LB || ex_alu_op == `LH || ex_alu_op == `LBU || ex_alu_op == `LHU) ? 1 : 0;
-        reg1_addr_o      <= `ZERO_WORD;
         reg1_read_enable <= `ReadDisable;
-        reg2_addr_o      <= `ZERO_WORD;
         reg2_read_enable <= `ReadDisable;
 
         Imm       <= `ZERO_WORD;

@@ -146,7 +146,6 @@ module cpu(
 		.rst(rst),
 
 		.stallreq_id(stallreq_id),
-		.stallreq_for_jump(stallreq_for_jump),
 		.stallreq_if(stallreq_if),
 		.stallreq_mem(stallreq_mem),
 
@@ -280,9 +279,7 @@ module cpu(
 		.alu_op_o(ex_alu_op),
 
 		.jump_flag(JumpFlag),
-		.jump_addr(jump_addr),
-
-		.stallreq_jump(stallreq_for_jump)
+		.jump_addr(jump_addr)
 	);
 
 	ex_mem ex_mem0 (

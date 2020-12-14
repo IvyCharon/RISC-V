@@ -8,7 +8,7 @@ module ex(
     input wire [`RegLen - 1 : 0] reg1,
     input wire [`RegLen - 1 : 0] reg2,
     input wire [`RegLen - 1 : 0] Imm,
-    input wire [`RegLen - 1 : 0] rd,
+    input wire [`RegAddrLen - 1 : 0] rd,
     input wire rd_enable,
     input wire [`ALU_Len - 1 : 0]    alu_op,
     input wire [`Jump_Len - 1 : 0]   jump_op,
@@ -26,10 +26,7 @@ module ex(
 
     //to pc_reg.v
     output reg jump_flag,
-    output reg [`AddrLen - 1 : 0] jump_addr,
-
-    //to ctrl.v
-    output reg [5 : 0] stallreq_jump
+    output reg [`AddrLen - 1 : 0] jump_addr
     
     );
 
@@ -71,7 +68,6 @@ module ex(
                 `SW          : res <= reg1 + reg2;
 
                 `JUMP        : begin
-                    stallreq_jump <= `Stall;
                     case (jump_op)
                         `JAL  : begin
                             res <= reg1 + 4;
@@ -96,37 +92,30 @@ module ex(
                         `BEQ  : begin
                             jump_flag <= (reg1 == reg2) ? `JumpEnable : `JumpDisable;
                             jump_addr <= (reg1 == reg2) ? jump_addr1 + Imm : `ZERO_WORD;
-                            stallreq_jump <= (reg1 == reg2) ? `Stall : `NoStall;
                         end
                         `BNE  : begin
                             jump_flag <= (reg1 != reg2) ? `JumpEnable : `JumpDisable;
                             jump_addr <= (reg1 != reg2) ? jump_addr1 + Imm : `ZERO_WORD;
-                            stallreq_jump <= (reg1 != reg2) ? `Stall : `NoStall;
                         end
                         `BLT  : begin
                             jump_flag <= ($signed(reg1) < $signed(reg2)) ? `JumpEnable : `JumpDisable;
                             jump_addr <= ($signed(reg1) < $signed(reg2)) ? jump_addr1 + Imm : `ZERO_WORD;
-                            stallreq_jump <= ($signed(reg1) < $signed(reg2)) ? `Stall : `NoStall;
                         end
                         `BGE  : begin
                             jump_flag <= ($signed(reg1) >= $signed(reg2)) ? `JumpEnable : `JumpDisable;
                             jump_addr <= ($signed(reg1) >= $signed(reg2)) ? jump_addr1 + Imm : `ZERO_WORD;
-                            stallreq_jump <= ($signed(reg1) >= $signed(reg2)) ? `Stall : `NoStall;
                         end
                         `BLTU : begin
                             jump_flag <= (reg1 < reg2) ? `JumpEnable : `JumpDisable;
                             jump_addr <= (reg1 < reg2) ? jump_addr1 + Imm : `ZERO_WORD;
-                            stallreq_jump <= (reg1 < reg2) ? `Stall : `NoStall;
                         end
                         `BGEU : begin
                             jump_flag <= (reg1 >= reg2) ? `JumpEnable : `JumpDisable;
                             jump_addr <= (reg1 >= reg2) ? jump_addr1 + Imm : `ZERO_WORD;
-                            stallreq_jump <= (reg1 >= reg2) ? `Stall : `NoStall;
                         end
                         default: begin
                             jump_flag <= 1'b0;
                             jump_addr <= `ZERO_WORD;
-                            stallreq_jump <= `NoStall;
                         end
                     endcase
                 end

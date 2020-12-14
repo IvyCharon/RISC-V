@@ -24,7 +24,6 @@ module register(
     );
     
     reg[`RegLen - 1 : 0] regs[`RegNum - 1 : 0];
-    reg[`RegLen - 1 : 0] reg_mark;
 
     integer i;
     

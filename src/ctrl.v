@@ -7,7 +7,6 @@ module ctrl (
 
     //from id.v
     input wire stallreq_id,
-    input wire stallreq_for_jump,
     //from i_cahce.v
     input wire stallreq_if,
     //from mem.v
@@ -26,8 +25,6 @@ module ctrl (
             stall <= 6'b000111;
         else if(stallreq_if == `Stall)
             stall <= 6'b000011;
-        else if(stallreq_for_jump == `Stall)
-            stall <= 6'b000110;
         else stall <= 6'b000000;
     end
 
