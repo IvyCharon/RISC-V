@@ -142,6 +142,9 @@ module cpu(
 	wire data_enable_mc_m;
 	wire icache_busy;
 
+	wire ifid_clear;
+	wire idex_clear;
+
 	ctrl ctrl0 (
 		.rst(rst),
 
@@ -188,6 +191,8 @@ module cpu(
 
 		.if_pc(pc_iffd),
 		.if_inst(inst_iffd),
+
+		.ifid_clear(ifid_clear),
 
 		.id_pc(pc_ifdd),
 		.id_inst(inst_ifdd)
@@ -247,6 +252,8 @@ module cpu(
 		.id_branch_op(branch_op_de),
 		.id_jump_addr1(jump_addr1_de),
 
+		.idex_clear(idex_clear),
+
 		.ex_reg1(reg1_dee),
 		.ex_reg2(reg2_dee),
 		.ex_Imm(imm_dee),
@@ -277,6 +284,9 @@ module cpu(
 		.rd_addr(ex_rd_addr),
 		.rd_enable_o(ex_rd_write),
 		.alu_op_o(ex_alu_op),
+
+		.ifid_clear(ifid_clear),
+		.idex_clear(idex_clear),
 
 		.jump_flag(JumpFlag),
 		.jump_addr(jump_addr)

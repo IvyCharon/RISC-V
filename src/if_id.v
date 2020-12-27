@@ -12,6 +12,8 @@ module if_id(
     input wire [`AddrLen - 1 : 0]  if_pc,
     input wire [`InstLen - 1 : 0]  if_inst,
 
+    input wire ifid_clear,
+
     //to id.v
     output reg [`AddrLen - 1 : 0]  id_pc,
     output reg [`InstLen - 1 : 0]  id_inst
@@ -22,7 +24,7 @@ module if_id(
             id_pc   <= `ZERO_WORD;
             id_inst <= `ZERO_WORD;
         end
-        else if (stall[1] && !stall[2]) begin
+        else if ((stall[1] && !stall[2]) || ifid_clear) begin
             id_pc   <= `ZERO_WORD;
             id_inst <= `ZERO_WORD;
         end

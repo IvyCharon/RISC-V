@@ -24,6 +24,9 @@ module ex(
     output reg rd_enable_o,
     output reg [`ALU_Len - 1 : 0]  alu_op_o,
 
+    output reg ifid_clear,
+    output reg idex_clear,
+
     //to pc_reg.v
     output reg jump_flag,
     output reg [`AddrLen - 1 : 0] jump_addr
@@ -63,9 +66,9 @@ module ex(
                 `LBU         : res <= reg1 + reg2;
                 `LHU         : res <= reg1 + reg2;
 
-                `SB          : res <= reg1 + reg2;
-                `SH          : res <= reg1 + reg2;
-                `SW          : res <= reg1 + reg2;
+                `SB          : res <= reg1 + Imm;
+                `SH          : res <= reg1 + Imm;
+                `SW          : res <= reg1 + Imm;
 
                 `JUMP        : begin
                     case (jump_op)
@@ -153,6 +156,17 @@ module ex(
                     mem_addr_o <= `ZERO_WORD;
                 end
             endcase
+        end
+    end
+
+    always @ (*) begin
+        if(jump_flag) begin
+            ifid_clear = 1'b1;
+            idex_clear = 1'b1;
+        end
+        else begin
+            ifid_clear = 1'b0;
+            idex_clear = 1'b0;
         end
     end
 endmodule

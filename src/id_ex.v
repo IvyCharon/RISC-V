@@ -19,6 +19,8 @@ module id_ex(
     input wire [`Branch_Len - 1 : 0] id_branch_op,
     input wire [`AddrLen - 1 : 0]    id_jump_addr1,
 
+    input wire idex_clear,
+
     //to ex.v
     output reg [`RegLen - 1 : 0] ex_reg1,
     output reg [`RegLen - 1 : 0] ex_reg2,
@@ -41,9 +43,9 @@ module id_ex(
             ex_alu_op      <= `NoAlu;
             ex_jump_op     <= `NoJump;
             ex_branch_op   <= `NoBranch;
-            ex_jump_addr1 <= `ZERO_WORD;
+            ex_jump_addr1  <= `ZERO_WORD;
         end
-        else if (stall[2] && !stall[3]) begin
+        else if ((stall[2] && !stall[3]) || idex_clear) begin
             ex_reg1        <= `ZERO_WORD;
             ex_reg2        <= `ZERO_WORD;
             ex_Imm         <= `ZERO_WORD;
@@ -52,7 +54,7 @@ module id_ex(
             ex_alu_op      <= `NoAlu;
             ex_jump_op     <= `NoJump;
             ex_branch_op   <= `NoBranch;
-            ex_jump_addr1 <= `ZERO_WORD;
+            ex_jump_addr1  <= `ZERO_WORD;
         end
         else if(!stall[2]) begin
             ex_reg1        <= id_reg1;

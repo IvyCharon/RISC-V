@@ -56,7 +56,7 @@ module mem_ctrl(
     assign s_data[3] = mem_data_i[31:24];
 
     assign addr = mem_enable ? mem_data_addr : icache_addr;
-    assign ram_rw = mem_enable ? ((cnt == num) ? mem_rw : 1'b0) : `read;
+    assign ram_rw = mem_enable ? ((cnt == num) ? 1'b0 : mem_rw ) : `read;
 
     assign num = mem_enable ? (mem_type == `b ? (3'b001) : (mem_type == `h ? 3'b010: 3'b100)) : (icache_needed ? 3'b100 : 3'b000);
 
@@ -67,7 +67,7 @@ module mem_ctrl(
         if(rst == `ResetEnable) begin
             raddr <= `ZERO_WORD;
         end
-        else if(raddr != addr) begin
+        else if(raddr != addr && !ram_rw) begin
             cnt <= 0;
             raddr <= addr;
         end
