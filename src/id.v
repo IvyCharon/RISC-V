@@ -46,7 +46,7 @@ module id(
     output reg [`AddrLen - 1 : 0]    jump_addr1,
 
     //to ctrl.v
-    output reg stallreq
+    output wire stallreq
     );
 
     wire [`OpLen - 1 : 0] opcode = inst[`OpLen - 1 : 0];
@@ -317,14 +317,17 @@ module id(
         endcase
     end
 
+    reg stallreq1;
+    reg stallreq2;
+
     //Get rs1
     always @ (*) begin
-        stallreq <= 1'b0;
+        stallreq1 <= 1'b0;
         if (rst == `ResetEnable) begin
             reg1 <= `ZERO_WORD;
         end
         else if(pre_inst && ex_rd_addr == reg1_addr_o && ex_rd_write) begin
-            stallreq <= 1'b1;
+            stallreq1 <= 1'b1;
         end
         else if(alu_op == `AUIPC || (alu_op == `JUMP && jump_op == `JAL)) begin
             reg1 <= pc;
@@ -363,12 +366,12 @@ module id(
 
     //Get rs2
     always @ (*) begin
-        stallreq <= 1'b0;
+        stallreq2 <= 1'b0;
         if (rst == `ResetEnable) begin
             reg2 <= `ZERO_WORD;
         end
         else if(pre_inst && ex_rd_addr == reg2_addr_o && ex_rd_write) begin
-            stallreq <= 1'b1;
+            stallreq2 <= 1'b1;
         end
         else if(reg2_read_enable == `ReadEnable && reg2_addr_o == ex_rd_addr && ex_rd_write == `WriteEnable && reg2_addr_o != `ZeroReg) begin
             reg2 <= ex_rd_data;
@@ -384,5 +387,7 @@ module id(
             reg2 <= reg2_data_i;
         end
     end
+
+    assign stallreq = stallreq1 | stallreq2;
 
 endmodule
