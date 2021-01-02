@@ -42,6 +42,7 @@ module mem_ctrl(
     );
 
     reg [2:0] cnt;//to remember how much bytes were read/written
+    wire newcnt;
     reg [`AddrLen - 1 : 0] raddr;
 
     wire [`AddrLen - 1 : 0] addr;
@@ -60,21 +61,14 @@ module mem_ctrl(
 
     assign num = mem_enable ? (mem_type == `b ? (3'b001) : (mem_type == `h ? 3'b010: 3'b100)) : (icache_needed ? 3'b100 : 3'b000);
 
-    assign ram_addr = addr + cnt;
-    assign ram_data = (cnt == 3'b100) ? `ZERO_WORD : s_data[cnt];
+    assign ram_addr = addr + (newcnt ? 0 : cnt);
+    assign ram_data = ((newcnt ? 0 : cnt) == 3'b100) ? `ZERO_WORD : s_data[(newcnt ? 0 : cnt)];
 
-    always @(*) begin
-        if(rst == `ResetEnable) begin
-            raddr <= `ZERO_WORD;
-        end
-        else if(raddr != addr && !ram_rw) begin
-            cnt <= 0;
-            raddr <= addr;
-        end
-    end
+    assign newcnt = (raddr != addr && !ram_rw) ? 1 : 0;
 
     always @(posedge clk) begin
         if(rst == `ResetEnable) begin
+            raddr            <= `ZERO_WORD;
             cnt              <= 0;
             inst_data_enable <= 0;
             mem_data_enable  <= 0;
@@ -88,7 +82,8 @@ module mem_ctrl(
             l_data[3]        <= 8'b00000000;
         end
         else if(num != 0 && ram_rw == `read) begin
-            if(cnt == 0) begin
+            if(cnt == 0 || newcnt) begin
+                raddr            <= addr;
                 cnt              <= 1;
                 inst_data_enable <= 1'b0;
                 mem_data_enable  <= 1'b0;
