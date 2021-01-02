@@ -45,7 +45,7 @@ module id_ex(
             ex_branch_op   <= `NoBranch;
             ex_jump_addr1  <= `ZERO_WORD;
         end
-        else if ((stall[2] && !stall[3]) || idex_clear) begin
+        else if ((stall[2] && !stall[3]) || (!stall[2] && idex_clear)) begin
             ex_reg1        <= `ZERO_WORD;
             ex_reg2        <= `ZERO_WORD;
             ex_Imm         <= `ZERO_WORD;
