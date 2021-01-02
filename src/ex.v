@@ -41,6 +41,8 @@ module ex(
         mem_wdata_o <= reg2;
         if (rst == `ResetEnable) begin
             res <= `ZERO_WORD;
+            alu_op_o <= `NoAlu;
+            mem_wdata_o <= `ZERO_WORD;
         end
         else begin
             jump_flag <= 1'b0;
@@ -136,8 +138,6 @@ module ex(
             rd_addr     <= `ZERO_WORD;
             rd_data_o   <= `ZERO_WORD;
             mem_addr_o  <= `ZERO_WORD;
-            mem_wdata_o <= `ZERO_WORD;
-            alu_op_o    <= `NoAlu;
         end
         else begin 
             rd_addr <= rd;

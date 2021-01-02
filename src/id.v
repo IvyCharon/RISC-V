@@ -209,8 +209,6 @@ module id(
 
                 alu_op <= `BRANCH;
 
-                jump_addr1 <= pc;
-
                 case (funct3)
                     `op_BEQ:  branch_op <= `BEQ;
                     `op_BNE:  branch_op <= `BNE;
@@ -295,8 +293,6 @@ module id(
 
                 funct3 <= `funct3Zero;
                 funct7 <= `funct7Zero;
-
-                jump_addr1 <= pc;
                 
             end
             default: begin
@@ -330,12 +326,19 @@ module id(
             stallreq1 <= 1'b1;
         end
         else if(alu_op == `AUIPC || (alu_op == `JUMP && jump_op == `JAL)) begin
+            if(alu_op == `JUMP && jump_op == `JAL) begin
+                jump_addr1 <= pc;
+            end
             reg1 <= pc;
         end
         else if(reg1_read_enable == `ReadEnable && reg1_addr_o == ex_rd_addr && ex_rd_write == `WriteEnable && reg1_addr_o != `ZeroReg) begin
             if(alu_op == `JUMP && jump_op == `JALR) begin
                 jump_addr1 <= ex_rd_data;
                 reg1 <= pc;
+            end 
+            else if(alu_op == `BRANCH) begin
+                jump_addr1 <= pc;
+                reg1 <= ex_rd_data;
             end
             else begin
                 reg1 <= ex_rd_data;
@@ -345,18 +348,29 @@ module id(
             if(alu_op == `JUMP && jump_op == `JALR) begin
                 jump_addr1 <= mem_rd_data;
                 reg1 <= pc;
+            end 
+            else if(alu_op == `BRANCH) begin
+                jump_addr1 <= pc;
+                reg1 <= mem_rd_data;
             end
             else begin
                reg1 <= mem_rd_data; 
             end
         end
         else if (reg1_read_enable == `ReadDisable) begin
+            if(alu_op == `BRANCH) begin
+                jump_addr1 <= pc;
+            end
             reg1 <= `ZERO_WORD;
         end
         else begin
             if(alu_op == `JUMP && jump_op == `JALR) begin
                 jump_addr1 <= reg1_data_i;
                 reg1 <= pc;
+            end
+            else if(alu_op == `BRANCH) begin
+                jump_addr1 <= pc;
+                reg1 <= reg1_data_i; 
             end
             else begin
                reg1 <= reg1_data_i; 
