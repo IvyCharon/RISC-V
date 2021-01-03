@@ -35,13 +35,11 @@ WNS:  -0.276ns
 
 ### Structure
 
-![](CPU.jpg)
+Showed in picture CPU.jpg
 
 ### Features
 
-#### basic design
-
-Structure is showed above. 
+#### basic design 
 
 Use `mem_ctrl` to handle read from/write to RAM, a typical structural hazard.
 
