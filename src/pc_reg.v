@@ -18,15 +18,6 @@ module pc_reg(
 
     reg [`AddrLen - 1 : 0] pc_r;
 
-/*
-    always @ (posedge clk) begin
-        if (rst == `ResetEnable)
-            chip_enable <= `ChipDisable;
-        else
-            chip_enable <= `ChipEnable;
-    end
-*/
-
     always @ (posedge clk) begin
         if (rst == `ResetEnable) begin
             pc   <= `ZERO_WORD;

@@ -6,37 +6,46 @@ A CPU that implements RV32I with Verilog HDL.
 
 ### Performance on FPGA
 
-Best frequency is xx with 
+Frequency: 100mHz
 
-| test case      | time    |
-| -------------- | ------- |
-| array_test1    | 1       |
-| array_test2    | 1       |
-| basicopt1      | 1       |
-| bulgarian      | 1       |
-| expr           | 1       |
-| gcd            | 1       |
-| hanoi          | 1       |
-| heart          | 1       |
-| lvalue2        | 1       |
-| magic          | 1       |
-| manyarguments  | 1       |
-| multiarray     | 1       |
-| pi             | 1       |
-| qsort          | 1       |
-| queens         | 1       |
-| statement_test | skipped |
-| superloop      | 1       |
-| tak            | 1       |
-| testsleep      | 1       |
-| uartboom       | 0       |
+WNS:  -0.231ns
 
-### icache参数
+| Test case      | Time(s)    |
+| -------------- | ---------- |
+| array_test1    | 0.015625   |
+| array_test2    | 0.015625   |
+| basicopt1      | 0.015625   |
+| bulgarian      | 0.937500   |
+| expr           | 0.015625   |
+| gcd            | 0.000000   |
+| hanoi          | 2.484375   |
+| heart          | 659.437500 |
+| lvalue2        | 0.015625   |
+| magic          | 0.000000   |
+| manyarguments  | 0.015625   |
+| multiarray     | 0.015625   |
+| pi             | 1.765625   |
+| qsort          | 4.812500   |
+| queens         | 2.312500   |
+| statement_test | skipped    |
+| superloop      | 0.031250   |
+| tak            | 0.046875   |
+| testsleep      | 7.000000   |
+| uartboom       | 0.531250   |
 
-### 分支预测策略
+### i_cache
 
-实现的是静态预测不跳转，当在`ex`阶段发现有跳转需求时，发送跳转指令给`pc_reg`，同时发送`clear`信号给`if_id`和`id_ex`清空数据。
+- direct-mapped cache
+- 128 * 4 = 512 Byte
+
+### Branch-prediction
+
+A static branch prediction which does not jump by default. If there is jump request in `ex`, it will send the address to `pc_reg`, meanwhile send `clear` signal to `if_id` and `id_ex` to clear all regs.
+
+### Structure
+
+![](https://github.com/IvyCharon/RISC-V/blob/main/CPU.jpg)
 
 ### reference
 
-+ 《自己动手写CPU》
++ 雷思磊.自己动手写CPU,电子工业出版社,2014
