@@ -37,13 +37,19 @@ module mem_ctrl(
     //to ram.v
     output wire [`AddrLen - 1 : 0] ram_addr,
     output wire [7 : 0] ram_data,
-    output wire ram_rw   //0 for read, 1 for write
+    output wire ram_rw,   //0 for read, 1 for write
+
+    //from cpu.v
+    input wire io_buffer_full,
+
+    output reg stall
 
     );
 
     reg [2:0] cnt;//to remember how much bytes were read/written
     wire newcnt;
     reg [`AddrLen - 1 : 0] raddr;
+    reg lastw;
 
     wire [`AddrLen - 1 : 0] addr;
     wire [2:0] num;
@@ -61,13 +67,15 @@ module mem_ctrl(
 
     assign num = mem_enable ? (mem_type == `b ? (3'b001) : (mem_type == `h ? 3'b010: 3'b100)) : (icache_needed ? 3'b100 : 3'b000);
 
-    assign ram_addr = addr + (newcnt ? 0 : cnt);
-    assign ram_data = ((newcnt ? 0 : cnt) == 3'b100) ? `ZERO_WORD : s_data[(newcnt ? 0 : cnt)];
+    assign ram_addr = (ram_rw == `write && addr[17:16] == 2'b11 && (lastw || io_buffer_full)) ? 0 : (addr + (newcnt ? 0 : cnt));
+    assign ram_data = (ram_rw == `write && addr[17:16] == 2'b11 && (lastw || io_buffer_full)) ? 0 : (((newcnt ? 0 : cnt) == 3'b100) ? `ZERO_WORD : s_data[(newcnt ? 0 : cnt)]);
 
     assign newcnt = (raddr != addr && !ram_rw) ? 1 : 0;
 
     always @(posedge clk) begin
         if(rst == `ResetEnable) begin
+            stall            <= 1'b0;
+            lastw            <= 1'b0;
             raddr            <= `ZERO_WORD;
             cnt              <= 0;
             inst_data_enable <= 0;
@@ -82,6 +90,8 @@ module mem_ctrl(
             l_data[3]        <= 8'b00000000;
         end
         else if(num != 0 && ram_rw == `read) begin
+            stall <= 1'b0;
+            lastw <= 1'b0;
             if(cnt == 0 || newcnt) begin
                 raddr            <= addr;
                 cnt              <= 1;
@@ -114,24 +124,37 @@ module mem_ctrl(
             end
         end
         else if(num != 0 && ram_rw == `write) begin
-            inst_data_enable <= 1'b0;
-            inst_o <= `ZERO_WORD;
-            if(cnt + 1 == num) begin
-                cnt             <= 0;
-                mem_data_enable <= 1'b1;
-            end
-            else if(cnt == 0) begin
-                cnt             <= cnt + 1;
-                icache_busy     <= 1'b0;
-                mem_busy        <= 1'b1;
-                mem_data_enable <= 1'b0;
-                mem_data_o      <= `ZERO_WORD;
+            if(addr[17:16] != 2'b11 || (!lastw && !io_buffer_full)) begin
+                stall <= 1'b0;
+                if(addr[17:16] == 2'b11) begin
+                    lastw <= 1'b1;
+                end
+                lastw            <= 1'b0;
+                inst_data_enable <= 1'b0;
+                inst_o <= `ZERO_WORD;
+                if(cnt + 1 == num) begin
+                    cnt             <= 0;
+                    mem_data_enable <= 1'b1;
+                end
+                else if(cnt == 0) begin
+                    cnt             <= cnt + 1;
+                    icache_busy     <= 1'b0;
+                    mem_busy        <= 1'b1;
+                    mem_data_enable <= 1'b0;
+                    mem_data_o      <= `ZERO_WORD;
+                end
+                else begin
+                    cnt <= cnt + 1;
+                end
             end
             else begin
-                cnt <= cnt + 1;
+                lastw <= 1'b0;
+                stall <= 1'b1;
             end
         end
         else begin
+            stall            <= 1'b0;
+            lastw            <= 1'b0;
             cnt              <= 0;
             inst_data_enable <= 0;
             mem_data_enable  <= 0;

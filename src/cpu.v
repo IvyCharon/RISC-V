@@ -145,12 +145,15 @@ module cpu(
 	wire ifid_clear;
 	wire idex_clear;
 
+	wire stallreq_mc;
+
 	ctrl ctrl0 (
 		.rst(rst),
 
 		.stallreq_id(stallreq_id),
 		.stallreq_if(stallreq_if),
 		.stallreq_mem(stallreq_mem),
+		.stallreq_mc(stallreq_mc),
 
 		.stall(stall)
 	);
@@ -422,7 +425,11 @@ module cpu(
 
 		.ram_addr(mem_a),
 		.ram_data(mem_dout),
-		.ram_rw(mem_wr)
+		.ram_rw(mem_wr),
+
+		.io_buffer_full(io_buffer_full),
+
+		.stall(stallreq_mc)
 
 	);
 
